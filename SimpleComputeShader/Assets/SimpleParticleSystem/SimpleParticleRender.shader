@@ -1,4 +1,6 @@
-﻿Shader "Hidden/SimpleParticleRender"
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Hidden/SimpleParticleRender"
 {
 	CGINCLUDE
 	#include "UnityCG.cginc"
@@ -74,7 +76,7 @@
 		{
 			float3 position = g_positions[i] * _ParticleSize;
 			position   = mul(_InvViewMatrix, position) + In[0].position;
-			o.position = mul(UNITY_MATRIX_MVP, float4(position, 1.0));
+			o.position = UnityObjectToClipPos(float4(position, 1.0));
 
 			o.color    = In[0].color;
 			o.texcoord = g_texcoords[i];

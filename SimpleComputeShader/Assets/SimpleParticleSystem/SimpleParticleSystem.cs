@@ -22,13 +22,15 @@ namespace SimpleParticleSystem
         public ComputeShader SimpleParticleComputeShader; // パーティクルの動きを計算するコンピュートシェーダ
         public Shader SimpleParticleRenderShader;  // パーティクルをレンダリングするシェーダ
 
-        public Vector3 Gravity = new Vector3(0.0f, -1.0f, 0.0f); // 重力
+        //public Vector3 Gravity = new Vector3(0.0f, -1.0f, 0.0f); // 重力
         public Vector3 AreaSize = Vector3.one * 10.0f;            // パーティクルが存在するエリアのサイズ
 
         public Texture2D ParticleTex;          // パーティクルのテクスチャ
         public float ParticleSize = 0.05f; // パーティクルのサイズ
 
         public Camera RenderCam; // パーティクルをレンダリングするカメラ（ビルボードのための逆ビュー行列計算に使用）
+        public Transform reInitPos;
+        public float lifeTime = 10.0f;
 
         ComputeBuffer particleBuffer;     // パーティクルのデータを格納するコンピュートバッファ 
         Material particleRenderMat;  // パーティクルをレンダリングするマテリアル
@@ -54,6 +56,7 @@ namespace SimpleParticleSystem
             particleRenderMat.hideFlags = HideFlags.HideAndDontSave;
         }
 
+
         void OnRenderObject()
         {
             ComputeShader cs = SimpleParticleComputeShader;
@@ -63,8 +66,10 @@ namespace SimpleParticleSystem
             int kernelId = cs.FindKernel("CSMain");
             // 各パラメータをセット
             cs.SetFloat("_TimeStep", Time.deltaTime);
-            cs.SetVector("_Gravity", Gravity);
+            //scs.SetVector("_Gravity", Gravity);
             cs.SetFloats("_AreaSize", new float[3] { AreaSize.x, AreaSize.y, AreaSize.z });
+            cs.SetVector("_RootPos", reInitPos.position);
+            cs.SetFloat("_Time", Time.time);
             // コンピュートバッファをセット
             cs.SetBuffer(kernelId, "_ParticleBuffer", particleBuffer);
             // コンピュートシェーダを実行
@@ -82,7 +87,7 @@ namespace SimpleParticleSystem
             // コンピュートバッファをセット
             m.SetBuffer("_ParticleBuffer", particleBuffer);
             // パーティクルをレンダリング
-            Graphics.DrawProcedural(MeshTopology.Points, NUM_PARTICLES);
+            Graphics.DrawProceduralNow(MeshTopology.Points, NUM_PARTICLES);
         }
 
         void OnDestroy()

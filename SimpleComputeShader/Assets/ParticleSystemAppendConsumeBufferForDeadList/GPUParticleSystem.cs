@@ -248,7 +248,7 @@ namespace ParticleSystemAppendConsumeBufferForDeadList
             // コンピュートバッファをセット
             m.SetBuffer("_ParticleBuffer", particleBuffer);
             // パーティクルをレンダリング
-            Graphics.DrawProcedural(MeshTopology.Points, NUM_PARTICLES);
+            Graphics.DrawProceduralNow(MeshTopology.Points, NUM_PARTICLES);
         }
 
         /// <summary>

@@ -16,10 +16,12 @@ struct ParticleData
 // 定数バッファ
 cbuffer CB
 {
-	float3 _Gravity;   // 重力
+	//float3 _Gravity;   // 重力
 	float3 _AreaSize;  // パーティクルが存在するエリアの大きさ
 	float  _TimeStep;  // タイムステップ
+	float3  _RootPos;
 }
+
 // 読み込み書き込みが可能なパーティクルデータを格納するバッファ
 RWStructuredBuffer<ParticleData> _ParticleBuffer;
 
@@ -61,7 +63,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	float3 position = _ParticleBuffer[idx].position;
 
 	// 加速度を計算
-	float3 acceleration = _Gravity.xyz;
+	float3 acceleration = 0.1 * randomInsideUnitSphere(float2(idx, 0));
 
 	// 速度を計算
 	velocity += acceleration * _TimeStep;
@@ -76,7 +78,8 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		// 速度と位置を初期化
 		float3 rnd = randomInsideUnitSphere(float2(idx, 0));
 		velocity = rnd;
-		position = rnd;
+		//position = rnd;
+		position = _RootPos;
 	}
 	// 速度と位置をバッファに書き込み
 	_ParticleBuffer[idx].velocity = velocity;

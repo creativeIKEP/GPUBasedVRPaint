@@ -247,7 +247,7 @@ namespace ParticleSystemAppendConsumeBuffer
             m.SetBuffer("_ParticleBuffer", particleBufferRead);
 
             m.SetPass(0);
-            Graphics.DrawProceduralIndirect(MeshTopology.Points, particleIndirectArgsBuffer, 0);
+            Graphics.DrawProceduralIndirectNow(MeshTopology.Points, particleIndirectArgsBuffer, 0);
         }
 
         /// <summary>

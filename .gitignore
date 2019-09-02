@@ -28,3 +28,12 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+
+SimpleComputeShader/.vs/
+SimpleComputeShader/Logs/
+SimpleComputeShader/Packages/
+SimpleComputeShader/ProjectSettings/PresetManager.asset
+SimpleComputeShader/ProjectSettings/VFXManager.asset
+SimpleComputeShader/ProjectSettings/XRSettings.asset
+
