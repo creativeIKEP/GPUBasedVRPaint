@@ -21,8 +21,6 @@ struct ParticleData
 // 定数バッファ
 cbuffer CB
 {
-	//float3 _Gravity;   // 重力
-	//float3 _AreaSize;  // パーティクルが存在するエリアの大きさ
 	float _TimeStep;  // タイムステップ
 	float3 _RootPos;
 	float4 _LinePostions[NUM_LINE_POSITIONS];
@@ -85,7 +83,6 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		// 速度と位置を初期化
 		float3 rnd = randomInsideUnitSphere(float2(idx, 0));
 		velocity = rnd;
-		//position = rnd;
 		float rnd2 = rand(float2(idx, 0));
 		int index = int(_LinePositionsNum * rnd2);
 		position = _LinePostions[index];

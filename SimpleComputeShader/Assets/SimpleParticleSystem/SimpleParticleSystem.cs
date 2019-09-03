@@ -25,9 +25,6 @@ namespace SimpleParticleSystem
         public ComputeShader SimpleParticleComputeShader; // パーティクルの動きを計算するコンピュートシェーダ
         public Shader SimpleParticleRenderShader;  // パーティクルをレンダリングするシェーダ
 
-        //public Vector3 Gravity = new Vector3(0.0f, -1.0f, 0.0f); // 重力
-        //public Vector3 AreaSize = Vector3.one * 10.0f;            // パーティクルが存在するエリアのサイズ
-
         public Texture2D ParticleTex;          // パーティクルのテクスチャ
         public float ParticleSize = 0.05f; // パーティクルのサイズ
 
@@ -62,7 +59,6 @@ namespace SimpleParticleSystem
             particleRenderMat.hideFlags = HideFlags.HideAndDontSave;
 
             linePositions = new Queue<Vector4>();
-            //linePositions.Enqueue(reInitPos.position);
         }
 
 
@@ -98,9 +94,6 @@ namespace SimpleParticleSystem
             int numThreadGroup = NUM_PARTICLES / NUM_THREAD_X;
             // 各パラメータをセット
             cs.SetFloat("_TimeStep", Time.deltaTime);
-            //scs.SetVector("_Gravity", Gravity);
-            //cs.SetFloats("_AreaSize", new float[3] { AreaSize.x, AreaSize.y, AreaSize.z });
-            //cs.SetVector("_RootPos", reInitPos.position);
             cs.SetInt("_LinePositionsNum", linePositions.Count);
             
             cs.SetVectorArray("_LinePostions", linePositions.ToArray());
