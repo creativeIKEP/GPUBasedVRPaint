@@ -9,6 +9,8 @@ namespace SimpleParticleSystem
     {
         public Vector3 Velocity; // 速度
         public Vector3 Position; // 位置
+        public float LifeTime;
+        public float TimeFromRePositioning;
     };
 
     public class SimpleParticleSystem : MonoBehaviour
@@ -23,7 +25,7 @@ namespace SimpleParticleSystem
         public Shader SimpleParticleRenderShader;  // パーティクルをレンダリングするシェーダ
 
         //public Vector3 Gravity = new Vector3(0.0f, -1.0f, 0.0f); // 重力
-        public Vector3 AreaSize = Vector3.one * 10.0f;            // パーティクルが存在するエリアのサイズ
+        //public Vector3 AreaSize = Vector3.one * 10.0f;            // パーティクルが存在するエリアのサイズ
 
         public Texture2D ParticleTex;          // パーティクルのテクスチャ
         public float ParticleSize = 0.05f; // パーティクルのサイズ
@@ -45,6 +47,8 @@ namespace SimpleParticleSystem
             {
                 pData[i].Velocity = Random.insideUnitSphere;
                 pData[i].Position = Random.insideUnitSphere;
+                pData[i].LifeTime = lifeTime;
+                pData[i].TimeFromRePositioning = 0;
             }
             // コンピュートバッファに初期値データをセット
             particleBuffer.SetData(pData);
@@ -67,9 +71,8 @@ namespace SimpleParticleSystem
             // 各パラメータをセット
             cs.SetFloat("_TimeStep", Time.deltaTime);
             //scs.SetVector("_Gravity", Gravity);
-            cs.SetFloats("_AreaSize", new float[3] { AreaSize.x, AreaSize.y, AreaSize.z });
+            //cs.SetFloats("_AreaSize", new float[3] { AreaSize.x, AreaSize.y, AreaSize.z });
             cs.SetVector("_RootPos", reInitPos.position);
-            cs.SetFloat("_Time", Time.time);
             // コンピュートバッファをセット
             cs.SetBuffer(kernelId, "_ParticleBuffer", particleBuffer);
             // コンピュートシェーダを実行

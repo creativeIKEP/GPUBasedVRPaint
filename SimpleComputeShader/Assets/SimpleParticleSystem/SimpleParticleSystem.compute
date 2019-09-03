@@ -11,15 +11,17 @@ struct ParticleData
 {
 	float3 velocity; // 速度
 	float3 position; // 位置
+	float lifeTime;
+	float timeFromRePositioning;
 };
 
 // 定数バッファ
 cbuffer CB
 {
 	//float3 _Gravity;   // 重力
-	float3 _AreaSize;  // パーティクルが存在するエリアの大きさ
-	float  _TimeStep;  // タイムステップ
-	float3  _RootPos;
+	//float3 _AreaSize;  // パーティクルが存在するエリアの大きさ
+	float _TimeStep;  // タイムステップ
+	float3 _RootPos;
 }
 
 // 読み込み書き込みが可能なパーティクルデータを格納するバッファ
@@ -65,23 +67,25 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	// 加速度を計算
 	float3 acceleration = 0.1 * randomInsideUnitSphere(float2(idx, 0));
 
+	float time = _ParticleBuffer[idx].timeFromRePositioning + _TimeStep;
+
 	// 速度を計算
 	velocity += acceleration * _TimeStep;
 	// 位置を計算
 	position += velocity     * _TimeStep;
 
-	// パーティクルがエリアの外にあるかどうか
-	if(position.x < -_AreaSize.x * 0.5 || position.x > _AreaSize.x * 0.5 ||
-	   position.y < -_AreaSize.y * 0.5 || position.y > _AreaSize.y * 0.5 ||
-	   position.z < -_AreaSize.z * 0.5 || position.z > _AreaSize.z * 0.5 )
+
+	if(time >= _ParticleBuffer[idx].lifeTime)
 	{
 		// 速度と位置を初期化
 		float3 rnd = randomInsideUnitSphere(float2(idx, 0));
 		velocity = rnd;
 		//position = rnd;
 		position = _RootPos;
+		time = 0;
 	}
 	// 速度と位置をバッファに書き込み
 	_ParticleBuffer[idx].velocity = velocity;
 	_ParticleBuffer[idx].position = position;
+	_ParticleBuffer[idx].timeFromRePositioning = time;
 }

@@ -10,6 +10,8 @@ Shader "Hidden/SimpleParticleRender"
 	{
 		float3 velocity;
 		float3 position;
+		float lifeTime;
+		float timeFromRePositioning;
 	};
 	// VertexShaderからGeometryShaderに渡すデータの構造体
 	struct v2g
