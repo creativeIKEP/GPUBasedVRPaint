@@ -6,6 +6,9 @@
 
 #define PI 3.14159265
 
+#define NUM_LINE_POSITIONS 4000
+
+
 // パーティクルデータの構造体
 struct ParticleData
 {
@@ -22,6 +25,8 @@ cbuffer CB
 	//float3 _AreaSize;  // パーティクルが存在するエリアの大きさ
 	float _TimeStep;  // タイムステップ
 	float3 _RootPos;
+	float4 _LinePostions[NUM_LINE_POSITIONS];
+	int _LinePositionsNum;
 }
 
 // 読み込み書き込みが可能なパーティクルデータを格納するバッファ
@@ -81,7 +86,9 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		float3 rnd = randomInsideUnitSphere(float2(idx, 0));
 		velocity = rnd;
 		//position = rnd;
-		position = _RootPos;
+		float rnd2 = rand(float2(idx, 0));
+		int index = int(_LinePositionsNum * rnd2);
+		position = _LinePostions[index];
 		time = 0;
 	}
 	// 速度と位置をバッファに書き込み
