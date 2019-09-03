@@ -28,8 +28,7 @@ public class ParticleBrush : MonoBehaviour
     public float ParticleSize = 0.05f; // パーティクルのサイズ
 
     public Camera RenderCam; // パーティクルをレンダリングするカメラ（ビルボードのための逆ビュー行列計算に使用）
-    public Transform reInitPos;
-    public float lifeTime = 10.0f;
+    public float lifeTime = 1.0f;
 
     ComputeBuffer particleBuffer;     // パーティクルのデータを格納するコンピュートバッファ 
     Material particleRenderMat;  // パーティクルをレンダリングするマテリアル
@@ -95,7 +94,6 @@ public class ParticleBrush : MonoBehaviour
         // 各パラメータをセット
         cs.SetFloat("_TimeStep", Time.deltaTime);
         cs.SetInt("_LinePositionsNum", linePositions.Count);
-
         cs.SetVectorArray("_LinePostions", linePositions.ToArray());
         // コンピュートバッファをセット
         cs.SetBuffer(kernelId, "_ParticleBuffer", particleBuffer);

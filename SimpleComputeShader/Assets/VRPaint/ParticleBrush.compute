@@ -85,21 +85,14 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		time = 0;
 
 		if (index >= _LinePositionsNum-1) {
-			position = _LinePostions[_LinePositionsNum - 1] + randomInsideUnitSphere(float2(idx, 0));
-			velocity = _LinePostions[_LinePositionsNum - 1] - _LinePostions[_LinePositionsNum - 2];
-			_ParticleBuffer[idx].acceleration = _LinePostions[_LinePositionsNum - 1] - _LinePostions[_LinePositionsNum - 2];
+			index = _LinePositionsNum - 2;
 		}
 		else if (index <= 0) {
-			position = _LinePostions[0] + randomInsideUnitSphere(float2(idx, 0));
-			velocity = _LinePostions[1] - _LinePostions[0];
-			_ParticleBuffer[idx].acceleration = _LinePostions[1] - _LinePostions[0];
+			index = 0;
 		}
-		else {
-			position = _LinePostions[index] + randomInsideUnitSphere(float2(idx, 0));
-			velocity = _LinePostions[index] - _LinePostions[index-1];
-			_ParticleBuffer[idx].acceleration = _LinePostions[index] - _LinePostions[index-1];
-		}
-		_ParticleBuffer[idx].acceleration *= 10.0;
+		position = _LinePostions[index] + randomInsideUnitSphere(float2(idx, 0));
+		velocity = _LinePostions[index + 1] - _LinePostions[index];
+		_ParticleBuffer[idx].acceleration = _LinePostions[index + 1] - _LinePostions[index];
 	}
 	// 速度と位置をバッファに書き込み
 	_ParticleBuffer[idx].velocity = velocity;
