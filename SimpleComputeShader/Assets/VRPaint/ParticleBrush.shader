@@ -10,6 +10,7 @@ Shader "Hidden/ParticleBrush"
 	{
 		float3 velocity;
 		float3 position;
+		float3 acceleration;
 		float lifeTime;
 		float timeFromRePositioning;
 	};

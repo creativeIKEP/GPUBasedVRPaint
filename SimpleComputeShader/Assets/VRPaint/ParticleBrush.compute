@@ -14,6 +14,7 @@ struct ParticleData
 {
 	float3 velocity; // 速度
 	float3 position; // 位置
+	float3 acceleration;
 	float lifeTime;
 	float timeFromRePositioning;
 };
@@ -22,7 +23,6 @@ struct ParticleData
 cbuffer CB
 {
 	float _TimeStep;  // タイムステップ
-	float3 _RootPos;
 	float4 _LinePostions[NUM_LINE_POSITIONS];
 	int _LinePositionsNum;
 }
@@ -68,7 +68,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	float3 position = _ParticleBuffer[idx].position;
 
 	// 加速度を計算
-	float3 acceleration = 0.1 * randomInsideUnitSphere(float2(idx, 0));
+	float3 acceleration = _ParticleBuffer[idx].acceleration;
 
 	float time = _ParticleBuffer[idx].timeFromRePositioning + _TimeStep;
 
@@ -80,13 +80,26 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 
 	if(time >= _ParticleBuffer[idx].lifeTime)
 	{
-		// 速度と位置を初期化
-		float3 rnd = randomInsideUnitSphere(float2(idx, 0));
-		velocity = rnd;
-		float rnd2 = rand(float2(idx, 0));
-		int index = int(_LinePositionsNum * rnd2);
-		position = _LinePostions[index];
+		float rnd = rand(float2(idx, 0));
+		int index = int(_LinePositionsNum * rnd);
 		time = 0;
+
+		if (index >= _LinePositionsNum-1) {
+			position = _LinePostions[_LinePositionsNum - 1] + randomInsideUnitSphere(float2(idx, 0));
+			velocity = _LinePostions[_LinePositionsNum - 1] - _LinePostions[_LinePositionsNum - 2];
+			_ParticleBuffer[idx].acceleration = _LinePostions[_LinePositionsNum - 1] - _LinePostions[_LinePositionsNum - 2];
+		}
+		else if (index <= 0) {
+			position = _LinePostions[0] + randomInsideUnitSphere(float2(idx, 0));
+			velocity = _LinePostions[1] - _LinePostions[0];
+			_ParticleBuffer[idx].acceleration = _LinePostions[1] - _LinePostions[0];
+		}
+		else {
+			position = _LinePostions[index] + randomInsideUnitSphere(float2(idx, 0));
+			velocity = _LinePostions[index] - _LinePostions[index-1];
+			_ParticleBuffer[idx].acceleration = _LinePostions[index] - _LinePostions[index-1];
+		}
+		_ParticleBuffer[idx].acceleration *= 10.0;
 	}
 	// 速度と位置をバッファに書き込み
 	_ParticleBuffer[idx].velocity = velocity;
