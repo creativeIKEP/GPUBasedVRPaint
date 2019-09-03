@@ -1,6 +1,6 @@
 ﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-Shader "Hidden/SimpleParticleRender"
+Shader "Hidden/ParticleBrush"
 {
 	CGINCLUDE
 	#include "UnityCG.cginc"
@@ -10,6 +10,8 @@ Shader "Hidden/SimpleParticleRender"
 	{
 		float3 velocity;
 		float3 position;
+		float lifeTime;
+		float timeFromRePositioning;
 	};
 	// VertexShaderからGeometryShaderに渡すデータの構造体
 	struct v2g
