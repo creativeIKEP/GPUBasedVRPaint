@@ -25,6 +25,7 @@ cbuffer CB
 	float _TimeStep;  // タイムステップ
 	float4 _LinePostions[NUM_LINE_POSITIONS];
 	int _LinePositionsNum;
+	float _Speed;
 }
 
 // 読み込み書き込みが可能なパーティクルデータを格納するバッファ
@@ -78,9 +79,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	position += velocity     * _TimeStep;
 
 
-	float speed = 10.0;
-
-
+	float speed = _Speed;
 
 	float minPointDistance = length(_LinePostions[0] - position);
 	float3 minDistancePoint = _LinePostions[0];

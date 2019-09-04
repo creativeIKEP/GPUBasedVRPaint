@@ -37,6 +37,9 @@ Shader "Hidden/ParticleBrush"
 	float     _ParticleSize;
 	// 逆ビュー行列
 	float4x4  _InvViewMatrix;
+
+	float4 _ParticleColor;
+
 	// Quadプレーンの座標
 	static const float3 g_positions[4] =
 	{
@@ -63,7 +66,7 @@ Shader "Hidden/ParticleBrush"
 		// パーティクルの位置
 		o.position = _ParticleBuffer[id].position;
 		// パーティクルの速度を色に反映
-		o.color    = float4(0.5 + 0.5 * normalize(_ParticleBuffer[id].velocity), 1.0);
+		o.color = _ParticleColor;
 		return o;
 	}
 
