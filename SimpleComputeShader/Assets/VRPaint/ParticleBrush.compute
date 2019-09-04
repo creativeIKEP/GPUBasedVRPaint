@@ -26,6 +26,7 @@ cbuffer CB
 	float4 _LinePostions[NUM_LINE_POSITIONS];
 	int _LinePositionsNum;
 	float _Speed;
+	float _Thickness;
 }
 
 // 読み込み書き込みが可能なパーティクルデータを格納するバッファ
@@ -91,7 +92,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	}
 
 	//TODO: マウスドラッグ速い時の修正をもう少し凝る
-	if (minPointDistance > 1 /*&& dot(normalize(velocity), normalize(_LinePostions[minPointIndex + 1] - _LinePostions[minPointIndex])) <0.975*/){
+	if (minPointDistance > _Thickness /*&& dot(normalize(velocity), normalize(_LinePostions[minPointIndex + 1] - _LinePostions[minPointIndex])) <0.975*/){
 		//初期化させる
 		time = _ParticleBuffer[idx].lifeTime;
 	}
@@ -110,7 +111,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 			index = 0;
 		}
 
-		position = _LinePostions[index] + randomInsideUnitSphere(float2(idx, 0));
+		position = _LinePostions[index] + _Thickness * randomInsideUnitSphere(float2(idx, 0));
 		velocity = normalize(_LinePostions[index + 1] - _LinePostions[index]);
 		acceleration = normalize(_LinePostions[index + 1] - _LinePostions[index]);
 		acceleration *= speed;
