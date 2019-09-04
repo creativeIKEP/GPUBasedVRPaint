@@ -80,21 +80,22 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 
 
 	float speed = _Speed;
-
 	float minPointDistance = length(_LinePostions[0] - position);
-	float3 minDistancePoint = _LinePostions[0];
+	int minPointIndex = 0;
 	for (int i = 0; i < _LinePositionsNum; i++) {
 		float dis = length(_LinePostions[i] - position);
 		if (dis < minPointDistance) {
 			minPointDistance = dis;
-			minDistancePoint = _LinePostions[i];
+			minPointIndex = i;
 		}
 	}
-	if (minPointDistance > 1) {
+
+	//TODO: マウスドラッグ速い時の修正をもう少し凝る
+	if (minPointDistance > 1 /*&& dot(normalize(velocity), normalize(_LinePostions[minPointIndex + 1] - _LinePostions[minPointIndex])) <0.975*/){
 		//初期化させる
 		time = _ParticleBuffer[idx].lifeTime;
 	}
-
+	
 
 	if(time >= _ParticleBuffer[idx].lifeTime)
 	{
@@ -108,6 +109,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		else if (index <= 0) {
 			index = 0;
 		}
+
 		position = _LinePostions[index] + randomInsideUnitSphere(float2(idx, 0));
 		velocity = normalize(_LinePostions[index + 1] - _LinePostions[index]);
 		acceleration = normalize(_LinePostions[index + 1] - _LinePostions[index]);
