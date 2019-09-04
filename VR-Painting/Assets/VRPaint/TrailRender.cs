@@ -15,7 +15,6 @@ public class TrailRender : MonoBehaviour
     void OnRenderObject()
     {
         _material.SetInt(GPUBasedTrails.TrailBrush.CSPARAM.NODE_NUM_PER_TRAIL, _trails.nodeNum);
-        _material.SetFloat(GPUBasedTrails.TrailBrush.CSPARAM.LIFE, _trails.life);
         _material.SetBuffer(GPUBasedTrails.TrailBrush.CSPARAM.TRAIL_BUFFER, _trails.trailBuffer);
         _material.SetBuffer(GPUBasedTrails.TrailBrush.CSPARAM.NODE_BUFFER, _trails.nodeBuffer);
         _material.SetPass(0);

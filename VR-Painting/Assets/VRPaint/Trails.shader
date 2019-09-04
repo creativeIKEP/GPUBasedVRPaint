@@ -2,8 +2,7 @@
 
 Properties {
 	_Width("Width", Float) = 0.1
-	_StartColor("StartColor", Color) = (1,1,1,1)
-	_EndColor("EndColor", Color) = (0,0,0,1)
+	_Color("Color", Color) = (1,1,1,1)
 }
    
 SubShader {
@@ -21,9 +20,7 @@ Pass{
 	#include "GPUTrailsUtil.cginc"
 
 	float _Width;
-	float _Life;
-	float4 _StartColor;
-	float4 _EndColor;
+	float4 _Color;
 	StructuredBuffer<Trail> _TrailBuffer;
 	StructuredBuffer<Node> _NodeBuffer;
 
@@ -75,10 +72,8 @@ Pass{
 		Out.dir = normalize(pos2 - pos0);
 		Out.dirNext = normalize(pos3 - pos1);
 
-		float ageRate = saturate((_Time.y - node1.time) / _Life);
-		float ageRateNext = saturate((_Time.y - node2.time) / _Life);
-		Out.col = lerp(_StartColor, _EndColor, ageRate);
-		Out.colNext = lerp(_StartColor, _EndColor, ageRateNext);
+		Out.col = _Color;
+		Out.colNext = _Color;
 
 		return Out;
 	}

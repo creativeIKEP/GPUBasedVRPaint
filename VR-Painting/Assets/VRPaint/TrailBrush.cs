@@ -25,10 +25,17 @@ namespace GPUBasedTrails
             public const string NODE_BUFFER = "_NodeBuffer";
             public const string INPUT_BUFFER = "_InputBuffer";
         }
+    
+        public enum TrailType
+        {
+            Trail,
+            Particle
+        }
 
         public struct Trail
         {
             public int currentNodeIdx;
+            public int type;
         }
 
         public struct Node
@@ -46,25 +53,19 @@ namespace GPUBasedTrails
 
         public ComputeShader cs;
 
-        public int trailNum = 1;
-
-        public float life = 10f;
+        public int trailNum = 100000;
+        public int nodeNum = 4000;
         public float updateDistaceMin = 0.01f;
 
         public ComputeBuffer trailBuffer;
         public ComputeBuffer nodeBuffer;
         public ComputeBuffer inputBuffer;
 
-        public int nodeNum { get; protected set; }
-
         #region Unity
 
         void Start()
         {
             Assert.IsNotNull(cs);
-
-            const float MAX_FPS = 60f;
-            nodeNum = Mathf.CeilToInt(life * MAX_FPS);
 
             var totalNodeNum = trailNum * nodeNum;
 
