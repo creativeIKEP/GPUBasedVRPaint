@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using TrailBase;
 
 // パーティクルデータの構造体
 public struct ParticleData
@@ -10,6 +11,7 @@ public struct ParticleData
     public Vector3 Acceleration;
     public float LifeTime;
     public float TimeFromRePositioning;
+    public int generatedNodeId;
 };
 
 public class ParticleBrush : MonoBehaviour
@@ -19,7 +21,6 @@ public class ParticleBrush : MonoBehaviour
     const int NUM_THREAD_X = 8; // スレッドグループのX成分のスレッド数
     const int NUM_THREAD_Y = 1; // スレッドグループのY成分のスレッド数
     const int NUM_THREAD_Z = 1; // スレッドグループのZ成分のスレッド数
-    const int NUM_LINE_POSITIONS = 4000;
 
     public ComputeShader SimpleParticleComputeShader; // パーティクルの動きを計算するコンピュートシェーダ
     public Shader SimpleParticleRenderShader;  // パーティクルをレンダリングするシェーダ
@@ -32,10 +33,11 @@ public class ParticleBrush : MonoBehaviour
     public Color particleColor;
     public float partticleSpeed = 10.0f;
     public float lineThickness = 1.0f;
+    public TrailBrush trailBrush;
 
     ComputeBuffer particleBuffer;     // パーティクルのデータを格納するコンピュートバッファ 
     Material particleRenderMat;  // パーティクルをレンダリングするマテリアル
-    Queue<Vector4> linePositions;
+
 
     void Start()
     {
@@ -50,6 +52,7 @@ public class ParticleBrush : MonoBehaviour
             pData[i].Acceleration = Random.insideUnitSphere;
             pData[i].LifeTime = lifeTime + Random.Range(-lifeTime * 0.5f, lifeTime * 0.5f);
             pData[i].TimeFromRePositioning = 0;
+            pData[i].generatedNodeId = i * trailBrush.nodeNum / NUM_PARTICLES;
         }
         // コンピュートバッファに初期値データをセット
         particleBuffer.SetData(pData);
@@ -59,27 +62,6 @@ public class ParticleBrush : MonoBehaviour
         // パーティクルをレンダリングするマテリアルを作成
         particleRenderMat = new Material(SimpleParticleRenderShader);
         particleRenderMat.hideFlags = HideFlags.HideAndDontSave;
-
-        linePositions = new Queue<Vector4>();
-    }
-
-
-    private void Update()
-    {
-        if (Input.GetMouseButton(0))
-        {
-            // Vector3でマウス位置座標を取得する
-            var position = Input.mousePosition;
-            // Z軸修正
-            position.z = 10f;
-            // マウス位置座標をスクリーン座標からワールド座標に変換する
-            var pos = Camera.main.ScreenToWorldPoint(position);
-            if (linePositions.Count >= NUM_LINE_POSITIONS)
-            {
-                linePositions.Dequeue();
-            }
-            linePositions.Enqueue(pos);
-        }
     }
 
 
@@ -87,23 +69,20 @@ public class ParticleBrush : MonoBehaviour
     {
         ComputeShader cs = SimpleParticleComputeShader;
         int kernelId = cs.FindKernel("CSMain");
-        if (linePositions.Count <= 0)
-        {
-            return;
-        }
 
         // スレッドグループ数を計算
-        int numThreadGroup = NUM_PARTICLES / NUM_THREAD_X;
+        //int numThreadGroup = NUM_PARTICLES / trailBrush.nodeNum;
         // 各パラメータをセット
+        cs.SetInt("_particleNum", NUM_PARTICLES);
         cs.SetFloat("_TimeStep", Time.deltaTime);
-        cs.SetInt("_LinePositionsNum", linePositions.Count);
-        cs.SetVectorArray("_LinePostions", linePositions.ToArray());
         cs.SetFloat("_Speed", partticleSpeed);
         cs.SetFloat("_Thickness", lineThickness);
+        cs.SetInt("_nodeBufferSize", trailBrush.nodeNum);
+        cs.SetBuffer(kernelId, "_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
         // コンピュートバッファをセット
         cs.SetBuffer(kernelId, "_ParticleBuffer", particleBuffer);
         // コンピュートシェーダを実行
-        cs.Dispatch(kernelId, numThreadGroup, 1, 1);
+        cs.Dispatch(kernelId, trailBrush.nodeNum, 1, 1);
 
 
         // 逆ビュー行列を計算
@@ -117,6 +96,7 @@ public class ParticleBrush : MonoBehaviour
         m.SetFloat("_ParticleSize", ParticleSize);
         // コンピュートバッファをセット
         m.SetBuffer("_ParticleBuffer", particleBuffer);
+        m.SetBuffer("_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
         m.SetColor("_ParticleColor", particleColor);
         // パーティクルをレンダリング
         Graphics.DrawProceduralNow(MeshTopology.Points, NUM_PARTICLES);

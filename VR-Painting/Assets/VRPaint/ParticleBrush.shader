@@ -4,6 +4,7 @@ Shader "Hidden/ParticleBrush"
 {
 	CGINCLUDE
 	#include "UnityCG.cginc"
+	#include "GPUTrailsUtil.cginc"
 
 	// パーティクルデータの構造体
 	struct ParticleData
@@ -13,6 +14,7 @@ Shader "Hidden/ParticleBrush"
 		float3 acceleration;
 		float lifeTime;
 		float timeFromRePositioning;
+		int generatedNodeId;
 	};
 	// VertexShaderからGeometryShaderに渡すデータの構造体
 	struct v2g
@@ -30,6 +32,9 @@ Shader "Hidden/ParticleBrush"
 
 	// パーティクルデータ
 	StructuredBuffer<ParticleData> _ParticleBuffer;
+
+	StructuredBuffer<Node> _NodeBuffer;
+
 	// パーティクルのテクスチャ
 	sampler2D _MainTex;
 	float4    _MainTex_ST;
@@ -63,10 +68,15 @@ Shader "Hidden/ParticleBrush"
 	v2g vert(uint id : SV_VertexID) // SV_VertexID:頂点ごとの識別子
 	{
 		v2g o = (v2g)0;
+
 		// パーティクルの位置
 		o.position = _ParticleBuffer[id].position;
 		// パーティクルの速度を色に反映
 		o.color = _ParticleColor;
+
+		if (!IsValid(_NodeBuffer[_ParticleBuffer[id].generatedNodeId])) {
+			o.color.a = 0.0;
+		}
 		return o;
 	}
 
@@ -77,17 +87,19 @@ Shader "Hidden/ParticleBrush"
 	void geom(point v2g In[1], inout TriangleStream<g2f> SpriteStream)
 	{
 		g2f o = (g2f)0;
-		[unroll]
-		for (int i = 0; i < 4; i++)
-		{
-			float3 position = g_positions[i] * _ParticleSize;
-			position   = mul(_InvViewMatrix, position) + In[0].position;
-			o.position = UnityObjectToClipPos(float4(position, 1.0));
+		if (In[0].color.a != 0.0) {
+			[unroll]
+			for (int i = 0; i < 4; i++)
+			{
+				float3 position = g_positions[i] * _ParticleSize;
+				position = mul(_InvViewMatrix, position) + In[0].position;
+				o.position = UnityObjectToClipPos(float4(position, 1.0));
 
-			o.color    = In[0].color;
-			o.texcoord = g_texcoords[i];
-			// 頂点追加
-			SpriteStream.Append(o);
+				o.color = In[0].color;
+				o.texcoord = g_texcoords[i];
+				// 頂点追加
+				SpriteStream.Append(o);
+			}
 		}
 		// ストリップを閉じる
 		SpriteStream.RestartStrip();

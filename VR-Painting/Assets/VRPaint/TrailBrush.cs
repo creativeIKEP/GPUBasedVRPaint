@@ -83,12 +83,14 @@ namespace TrailBase
         #endregion
 
         public int trailNum = 100000;
-        public int nodeNum = 4000;
         public float updateDistaceMin = 0.01f;
         public TrailType currentTrailType;
         public float width;
 
         public TrailData[] trailDatas;
+
+        //変更するときは、ParticleBrush.computeの定数宣言も書き換えるように
+        public int nodeNum { get { return 4000; } }
 
         #region Unity
 

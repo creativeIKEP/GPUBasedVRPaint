@@ -1,12 +1,15 @@
 ﻿#pragma kernel CSMain  // カーネル関数を指定
 
-#define NUM_THREAD_X 8 // スレッド数 X成分
+#define PARTICLE_NUM 32768 //ParticleBrush.csの定数と合わせる
+#define NODE_NUM 4000 //TrailBrush.csの定数と合わせる
+
+#define NUM_THREAD_X 32768 / 4000
 #define NUM_THREAD_Y 1 // スレッド数 Y成分
 #define NUM_THREAD_Z 1 // スレッド数 Z成分
 
 #define PI 3.14159265
 
-#define NUM_LINE_POSITIONS 4000
+#include "GPUTrailsUtil.cginc"
 
 
 // パーティクルデータの構造体
@@ -17,20 +20,23 @@ struct ParticleData
 	float3 acceleration;
 	float lifeTime;
 	float timeFromRePositioning;
+	int generatedNodeId;
 };
 
 // 定数バッファ
 cbuffer CB
 {
 	float _TimeStep;  // タイムステップ
-	float4 _LinePostions[NUM_LINE_POSITIONS];
-	int _LinePositionsNum;
 	float _Speed;
 	float _Thickness;
 }
 
 // 読み込み書き込みが可能なパーティクルデータを格納するバッファ
 RWStructuredBuffer<ParticleData> _ParticleBuffer;
+int _particleNum;
+
+StructuredBuffer<Node> _NodeBuffer;
+
 
 // 乱数(0.0~1.0)を返す関数
 float rand(float2 co)
@@ -62,6 +68,9 @@ void CSMain ( uint3 Gid  : SV_GroupID,
               uint3 DTid : SV_DispatchThreadID,
 			  uint  GI   : SV_GroupIndex )
 {
+	float speed = _Speed;
+	int nodeId = Gid.x;
+
 	// パーティクルのインデックス
 	int idx = DTid.x;
 	// パーティクルの速度を読み込み
@@ -78,28 +87,11 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	velocity += acceleration * _TimeStep;
 	// 位置を計算
 	position += velocity     * _TimeStep;
-
-
-	float speed = _Speed;
-	float minPointDistance = length(_LinePostions[0] - position);
-	int minPointIndex = 0;
-	for (int i = 0; i < _LinePositionsNum; i++) {
-		float dis = length(_LinePostions[i] - position);
-		if (dis < minPointDistance) {
-			minPointDistance = dis;
-			minPointIndex = i;
-		}
-	}
-
-	//TODO: マウスドラッグ速い時の修正をもう少し凝る
-	if (minPointDistance > _Thickness /*&& dot(normalize(velocity), normalize(_LinePostions[minPointIndex + 1] - _LinePostions[minPointIndex])) <0.975*/){
-		//初期化させる
-		time = _ParticleBuffer[idx].lifeTime;
-	}
 	
 
 	if(time >= _ParticleBuffer[idx].lifeTime)
 	{
+		/*
 		float rnd = rand(float2(idx, 0));
 		int index = int(_LinePositionsNum * rnd);
 		time = 0;
@@ -110,10 +102,18 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		else if (index <= 0) {
 			index = 0;
 		}
+		
 
 		position = _LinePostions[index] + _Thickness * randomInsideUnitSphere(float2(idx, 0));
 		velocity = normalize(_LinePostions[index + 1] - _LinePostions[index]);
 		acceleration = normalize(_LinePostions[index + 1] - _LinePostions[index]);
+		acceleration *= speed;
+		*/
+
+		time = 0;
+		position = _NodeBuffer[nodeId].position + _Thickness * randomInsideUnitSphere(float(idx));
+		velocity = normalize(_NodeBuffer[nodeId + 1].position - _NodeBuffer[nodeId].position);
+		acceleration = normalize(_NodeBuffer[nodeId + 1].position - _NodeBuffer[nodeId].position);
 		acceleration *= speed;
 	}
 	// 速度と位置をバッファに書き込み
@@ -121,4 +121,5 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	_ParticleBuffer[idx].position = position;
 	_ParticleBuffer[idx].acceleration = acceleration;
 	_ParticleBuffer[idx].timeFromRePositioning = time;
+	_ParticleBuffer[idx].generatedNodeId = nodeId;
 }

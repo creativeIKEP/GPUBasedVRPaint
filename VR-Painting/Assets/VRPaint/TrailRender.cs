@@ -5,13 +5,8 @@ using TrailBase;
 public class TrailRender : MonoBehaviour
 {
     public Material _material;
-    TrailBase.TrailBrush _trails;
+    public TrailBase.TrailBrush _trails;
 
-
-    private void Start()
-    {
-        _trails = GetComponent<TrailBrush>();
-    }
 
     void OnRenderObject()
     {
