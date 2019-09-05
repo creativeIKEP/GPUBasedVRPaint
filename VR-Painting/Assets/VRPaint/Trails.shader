@@ -21,13 +21,9 @@ Pass{
 
 	float _Width;
 	float4 _Color;
-	StructuredBuffer<Trail> _TrailBuffer;
 	StructuredBuffer<Node> _NodeBuffer;
-
-	Node GetNode(int trailIdx, int nodeIdx)
-	{
-		return _NodeBuffer[ToNodeBufIdx(trailIdx, nodeIdx)];
-	}
+	int _currentNodeIdx;
+	int _nodeBufferSize;
 
 	struct vs_out {
 		float4 pos : POSITION0;
@@ -43,22 +39,24 @@ Pass{
 		float4 col : COLOR;
 	};
 
-	vs_out vert (uint id : SV_VertexID, uint instanceId : SV_InstanceID)
+	Node GetNode(int id) {
+		return _NodeBuffer[id % _nodeBufferSize];
+	}
+
+	vs_out vert (uint id : SV_VertexID)
 	{
 		vs_out Out;
-		Trail trail = _TrailBuffer[instanceId];
-		int currentNodeIdx = trail.currentNodeIdx;
 
-		Node node0 = GetNode(instanceId, id-1);
-		Node node1 = GetNode(instanceId, id); // current
-		Node node2 = GetNode(instanceId, id+1);
-		Node node3 = GetNode(instanceId, id+2);
+		Node node0 = GetNode(id-1);
+		Node node1 = GetNode(id); // current
+		Node node2 = GetNode(id + 1);
+		Node node3 = GetNode(id + 2);
 
-		bool isLastNode = (currentNodeIdx == (int)id);
+		bool isLastNode = (_currentNodeIdx == (int)id);
 
 		if ( isLastNode || !IsValid(node1) || node1.trailId != node2.trailId)
 		{
-			node0 = node1 = node2 = node3 = GetNode(instanceId, currentNodeIdx);
+			node0 = node1 = node2 = node3 = _NodeBuffer[_currentNodeIdx];
 		}
 
 		float3 pos1 = node1.position;
@@ -69,8 +67,8 @@ Pass{
 		Out.pos = float4(pos1, 1);
 		Out.posNext = float4(pos2, 1);
 
-		Out.dir = normalize(pos2 - pos0);
-		Out.dirNext = normalize(pos3 - pos1);
+		Out.dir = normalize(pos2 - pos1);
+		Out.dirNext = normalize(pos3 - pos2);
 
 		Out.col = _Color;
 		Out.colNext = _Color;

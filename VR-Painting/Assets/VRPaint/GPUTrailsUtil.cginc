@@ -8,7 +8,6 @@ struct Input
 
 struct Trail
 {
-	int currentNodeIdx;
 	int type;
 };
 

@@ -27,7 +27,7 @@ namespace GPUBasedTrails
             trailBuffer = new ComputeBuffer(trailNum, Marshal.SizeOf(typeof(Trail)));
             nodeBuffer = new ComputeBuffer(totalNodeNum, Marshal.SizeOf(typeof(Node)));
 
-            var initTrail = new Trail() { currentNodeIdx = -1 };
+            var initTrail = new Trail();
             var initNode = new Node() { time = -1 };
 
             trails = Enumerable.Repeat(initTrail, trailNum).ToArray();
@@ -47,7 +47,6 @@ namespace GPUBasedTrails
 
     public struct Trail
     {
-        public int currentNodeIdx;
         public int type;
     }
 
@@ -119,9 +118,9 @@ namespace GPUBasedTrails
                 }
 
                 bool update = true;
-                if (trail.currentNodeIdx >= 0)
+                if (trailData.currentNodeIdx >= 0)
                 {
-                    Node node = trailData.nodes[trail.currentNodeIdx];
+                    Node node = trailData.nodes[trailData.currentNodeIdx];
                     float dist = Vector3.Distance(input.pos, node.pos);
                     update = dist > updateDistaceMin;
                 }
@@ -141,13 +140,10 @@ namespace GPUBasedTrails
                     }
 
                     // update trail
-                    trail.currentNodeIdx = trailData.currentNodeIdx;
                     trailData.trails[trailData.currentTrailId] = trail;
 
                     // write new node
-                    //currentNodeIdx = trail.currentNodeIdx + currentTrailId * nodeNum;
                     trailData.nodes[trailData.currentNodeIdx] = node;
-                    Debug.Log(trailData.currentNodeIdx);
 
                     trailData.trailBuffer.SetData(trailData.trails);
                     trailData.nodeBuffer.SetData(trailData.nodes);
