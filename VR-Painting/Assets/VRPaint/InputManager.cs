@@ -1,11 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using GPUBasedTrails;
+//using GPUBasedTrails;
 
 public class InputManager : MonoBehaviour
 {
-    public TrailBrush trailBrush;
+    public GPUBasedTrails.TrailBrush trailBrush;
     bool isNewTrailInput;
 
     // Update is called once per frame
@@ -24,7 +24,7 @@ public class InputManager : MonoBehaviour
             position.z = 10f;
             // マウス位置座標をスクリーン座標からワールド座標に変換する
             var pos = Camera.main.ScreenToWorldPoint(position);
-            TrailBrush.Input nodeInput = new TrailBrush.Input { pos = pos };
+            GPUBasedTrails.Input nodeInput = new GPUBasedTrails.Input { pos = pos };
             trailBrush.InputPoint(nodeInput, isNewTrailInput);
             isNewTrailInput = false;
         }
