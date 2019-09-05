@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Collections;
+﻿using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using UnityEngine.Assertions;
-using System;
 
-namespace GPUBasedTrails
+
+namespace TrailBase
 {
     public class TrailData
     {

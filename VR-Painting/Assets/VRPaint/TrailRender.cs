@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-using GPUBasedTrails;
+using TrailBase;
 
 
 public class TrailRender : MonoBehaviour
 {
     public Material _material;
-    GPUBasedTrails.TrailBrush _trails;
+    TrailBase.TrailBrush _trails;
 
 
     private void Start()
