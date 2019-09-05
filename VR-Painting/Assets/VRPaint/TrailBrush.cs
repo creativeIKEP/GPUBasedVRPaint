@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -55,6 +56,7 @@ namespace GPUBasedTrails
         public float time;
         public Vector3 pos;
         public int trailId;
+        public Color color;
     }
 
     public struct Input
@@ -86,6 +88,7 @@ namespace GPUBasedTrails
         public int nodeNum = 4000;
         public float updateDistaceMin = 0.01f;
         public TrailType currentTrailType;
+        public float width;
 
         public TrailData[] trailDatas;
 
@@ -131,6 +134,7 @@ namespace GPUBasedTrails
                     node.time = Time.time;
                     node.pos = input.pos;
                     node.trailId = trailData.currentTrailId;
+                    node.color = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value, 1);
 
                     trailData.currentNodeIdx++;
 

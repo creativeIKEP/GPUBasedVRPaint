@@ -1,8 +1,7 @@
 ﻿Shader "GPUTrails/Trails" {
 
 Properties {
-	_Width("Width", Float) = 0.1
-	_Color("Color", Color) = (1,1,1,1)
+	
 }
    
 SubShader {
@@ -19,11 +18,10 @@ Pass{
 	#include "UnityCG.cginc"
 	#include "GPUTrailsUtil.cginc"
 
-	float _Width;
-	float4 _Color;
 	StructuredBuffer<Node> _NodeBuffer;
 	int _currentNodeIdx;
 	int _nodeBufferSize;
+	float _Width;
 
 	struct vs_out {
 		float4 pos : POSITION0;
@@ -70,8 +68,8 @@ Pass{
 		Out.dir = normalize(pos2 - pos1);
 		Out.dirNext = normalize(pos3 - pos2);
 
-		Out.col = _Color;
-		Out.colNext = _Color;
+		Out.col = node1.color;
+		Out.colNext = node2.color;
 
 		return Out;
 	}
