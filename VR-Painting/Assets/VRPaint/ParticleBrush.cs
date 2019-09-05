@@ -16,7 +16,7 @@ public struct ParticleData
 
 public class ParticleBrush : MonoBehaviour
 {
-    const int NUM_PARTICLES = 32768; // 生成するパーティクルの数
+    const int NUM_PARTICLES = 327680; // 生成するパーティクルの数
 
     const int NUM_THREAD_X = 8; // スレッドグループのX成分のスレッド数
     const int NUM_THREAD_Y = 1; // スレッドグループのY成分のスレッド数

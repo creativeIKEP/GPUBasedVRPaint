@@ -1,9 +1,9 @@
 ﻿#pragma kernel CSMain  // カーネル関数を指定
 
-#define PARTICLE_NUM 32768 //ParticleBrush.csの定数と合わせる
+#define PARTICLE_NUM 327680 //ParticleBrush.csの定数と合わせる
 #define NODE_NUM 4000 //TrailBrush.csの定数と合わせる
 
-#define NUM_THREAD_X 32768 / 4000
+#define NUM_THREAD_X (PARTICLE_NUM / NODE_NUM)
 #define NUM_THREAD_Y 1 // スレッド数 Y成分
 #define NUM_THREAD_Z 1 // スレッド数 Z成分
 
@@ -87,35 +87,35 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	velocity += acceleration * _TimeStep;
 	// 位置を計算
 	position += velocity     * _TimeStep;
+
+	int nextNodeId = nodeId + 1;
+	if (!IsValid(_NodeBuffer[nextNodeId])) {
+		nextNodeId = nodeId;
+	}
+
+	
+	if (length(position - _NodeBuffer[nodeId].position) > length(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position)) {
+		//position = _NodeBuffer[nextNodeId].position + _Thickness * randomInsideUnitSphere(float(idx));
+		velocity = normalize(_NodeBuffer[nextNodeId + 1].position - _NodeBuffer[nextNodeId].position);
+		acceleration = normalize(_NodeBuffer[nextNodeId + 1].position - _NodeBuffer[nextNodeId].position);
+		acceleration *= speed;
+
+		if (length(position - _NodeBuffer[nextNodeId].position) > _Thickness * 1.5) {
+			time = _ParticleBuffer[idx].lifeTime;
+		}
+	}
 	
 
-	if(time >= _ParticleBuffer[idx].lifeTime)
+	if (time >= _ParticleBuffer[idx].lifeTime)
 	{
-		/*
-		float rnd = rand(float2(idx, 0));
-		int index = int(_LinePositionsNum * rnd);
-		time = 0;
-
-		if (index >= _LinePositionsNum-1) {
-			index = _LinePositionsNum - 2;
-		}
-		else if (index <= 0) {
-			index = 0;
-		}
-		
-
-		position = _LinePostions[index] + _Thickness * randomInsideUnitSphere(float2(idx, 0));
-		velocity = normalize(_LinePostions[index + 1] - _LinePostions[index]);
-		acceleration = normalize(_LinePostions[index + 1] - _LinePostions[index]);
-		acceleration *= speed;
-		*/
-
 		time = 0;
 		position = _NodeBuffer[nodeId].position + _Thickness * randomInsideUnitSphere(float(idx));
-		velocity = normalize(_NodeBuffer[nodeId + 1].position - _NodeBuffer[nodeId].position);
-		acceleration = normalize(_NodeBuffer[nodeId + 1].position - _NodeBuffer[nodeId].position);
+		velocity = normalize(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position);
+		//position += rand(float2(idx, 0)) * length(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position) * velocity;
+		acceleration = normalize(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position);
 		acceleration *= speed;
 	}
+
 	// 速度と位置をバッファに書き込み
 	_ParticleBuffer[idx].velocity = velocity;
 	_ParticleBuffer[idx].position = position;
