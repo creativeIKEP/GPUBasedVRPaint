@@ -12,9 +12,6 @@ namespace GPUBasedTrails
 
         public static class CSPARAM
         {
-            // kernels
-            public const string CALC_INPUT = "InputCalc";
-
             // parameters
             public const string TIME = "_Time";
             public const string UPDATE_DISTANCE_MIN = "_UpdateDistanceMin";
@@ -42,6 +39,7 @@ namespace GPUBasedTrails
         {
             public float time;
             public Vector3 pos;
+            public int trailId;
         }
 
         public struct Input
@@ -51,66 +49,90 @@ namespace GPUBasedTrails
 
         #endregion
 
-        public ComputeShader cs;
-
         public int trailNum = 100000;
         public int nodeNum = 4000;
         public float updateDistaceMin = 0.01f;
 
         public ComputeBuffer trailBuffer;
         public ComputeBuffer nodeBuffer;
-        public ComputeBuffer inputBuffer;
+
+        Trail[] trails;
+        Node[] nodes;
+        int currentTrailId;
 
         #region Unity
 
         void Start()
         {
-            Assert.IsNotNull(cs);
+            currentTrailId = -1;
 
             var totalNodeNum = trailNum * nodeNum;
 
             trailBuffer = new ComputeBuffer(trailNum, Marshal.SizeOf(typeof(Trail)));
             nodeBuffer = new ComputeBuffer(totalNodeNum, Marshal.SizeOf(typeof(Node)));
-            inputBuffer = new ComputeBuffer(trailNum, Marshal.SizeOf(typeof(Input)));
 
             var initTrail = new Trail() { currentNodeIdx = -1 };
             var initNode = new Node() { time = -1 };
 
-            trailBuffer.SetData(Enumerable.Repeat(initTrail, trailNum).ToArray());
-            nodeBuffer.SetData(Enumerable.Repeat(initNode, totalNodeNum).ToArray());
+            trails = Enumerable.Repeat(initTrail, trailNum).ToArray();
+            nodes = Enumerable.Repeat(initNode, totalNodeNum).ToArray();
+
+            trailBuffer.SetData(trails);
+            nodeBuffer.SetData(nodes);
         }
 
 
-        void LateUpdate()
+        public void InputPoint(Input input, bool isNewTrail)
         {
-            cs.SetFloat(CSPARAM.TIME, Time.time);
-            cs.SetFloat(CSPARAM.UPDATE_DISTANCE_MIN, updateDistaceMin);
-            cs.SetInt(CSPARAM.TRAIL_NUM, trailNum);
-            cs.SetInt(CSPARAM.NODE_NUM_PER_TRAIL, nodeNum);
+            if (isNewTrail)
+            {
+                currentTrailId++;
+            }
 
-            var kernel = cs.FindKernel(CSPARAM.CALC_INPUT);
-            cs.SetBuffer(kernel, CSPARAM.TRAIL_BUFFER, trailBuffer);
-            cs.SetBuffer(kernel, CSPARAM.NODE_BUFFER, nodeBuffer);
-            cs.SetBuffer(kernel, CSPARAM.INPUT_BUFFER, inputBuffer);
+            if (currentTrailId < trailNum)
+            {
+                Trail trail = trails[currentTrailId];
+                int currentNodeIdx = trail.currentNodeIdx + currentTrailId * nodeNum;
 
-            ComputeShaderUtil.Dispatch(cs, kernel, new Vector3(trailNum, 1f, 1f));
+                bool update = true;
+                if (trail.currentNodeIdx >= 0)
+                {
+                    Node node = nodes[trail.currentNodeIdx];
+                    float dist = Vector3.Distance(input.pos, node.pos);
+                    update = dist > updateDistaceMin;
+                }
+
+                if (update)
+                {
+                    Node node;
+                    node.time = Time.time;
+                    node.pos = input.pos;
+                    node.trailId = currentTrailId;
+
+                    currentNodeIdx++;
+
+                    // update trail
+                    trail.currentNodeIdx = currentNodeIdx % nodeNum;
+                    trails[currentTrailId] = trail;
+
+                    // write new node
+                    currentNodeIdx = trail.currentNodeIdx + currentTrailId * nodeNum;
+                    nodes[currentNodeIdx] = node;
+
+                    trailBuffer.SetData(trails);
+                    nodeBuffer.SetData(nodes);
+                }
+            }
         }
+
 
 
         private void OnDestroy()
         {
             trailBuffer.Release();
             nodeBuffer.Release();
-            inputBuffer.Release();
         }
 
         #endregion
-
-
-
-        public void InputPoint(List<Input> inputs)
-        {
-            inputBuffer.SetData(inputs);
-        }
     }
 }

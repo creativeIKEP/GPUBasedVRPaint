@@ -56,7 +56,7 @@ Pass{
 
 		bool isLastNode = (currentNodeIdx == (int)id);
 
-		if ( isLastNode || !IsValid(node1))
+		if ( isLastNode || !IsValid(node1) || node1.trailId != node2.trailId)
 		{
 			node0 = node1 = node2 = node3 = GetNode(instanceId, currentNodeIdx);
 		}

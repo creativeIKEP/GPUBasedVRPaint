@@ -47,6 +47,7 @@ void InputCalc(uint3 id : SV_DispatchThreadID)
 			Node node;
 			node.time = _Time;
 			node.position = input.position;
+			node.trailId = trailIdx;
 
 			currentNodeIdx++;
 			currentNodeIdx %= _NodeNumPerTrail;

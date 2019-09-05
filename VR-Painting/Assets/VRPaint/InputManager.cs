@@ -6,15 +6,16 @@ using GPUBasedTrails;
 public class InputManager : MonoBehaviour
 {
     public TrailBrush trailBrush;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    bool isNewTrailInput;
 
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            isNewTrailInput = true;
+        }
+
         if (Input.GetMouseButton(0))
         {
             // Vector3でマウス位置座標を取得する
@@ -24,7 +25,13 @@ public class InputManager : MonoBehaviour
             // マウス位置座標をスクリーン座標からワールド座標に変換する
             var pos = Camera.main.ScreenToWorldPoint(position);
             TrailBrush.Input nodeInput = new TrailBrush.Input { pos = pos };
-            trailBrush.InputPoint(new List<TrailBrush.Input> { nodeInput });
+            trailBrush.InputPoint(nodeInput, isNewTrailInput);
+            isNewTrailInput = false;
+        }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            isNewTrailInput = false;
         }
     }
 }

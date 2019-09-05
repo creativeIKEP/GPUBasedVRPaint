@@ -16,6 +16,7 @@ struct Node
 {
 	float time;
     float3 position;
+	int trailId;
 };
 
 
