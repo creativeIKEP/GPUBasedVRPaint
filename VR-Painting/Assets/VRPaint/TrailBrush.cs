@@ -145,8 +145,8 @@ namespace GPUBasedTrails
                     // write new node
                     trailData.nodes[trailData.currentNodeIdx] = node;
 
-                    trailData.trailBuffer.SetData(trailData.trails);
-                    trailData.nodeBuffer.SetData(trailData.nodes);
+                    trailData.trailBuffer.SetData(trailData.trails, trailData.currentTrailId, trailData.currentTrailId, 1);
+                    trailData.nodeBuffer.SetData(trailData.nodes, trailData.currentNodeIdx, trailData.currentNodeIdx, 1);
                 }
             }
         }
