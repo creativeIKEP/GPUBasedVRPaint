@@ -32,7 +32,6 @@ public class ParticleBrush : MonoBehaviour
     public float lifeTime = 1.0f;
     public Color particleColor;
     public float partticleSpeed = 10.0f;
-    public float lineThickness = 1.0f;
     public TrailBrush trailBrush;
 
     ComputeBuffer particleBuffer;     // パーティクルのデータを格納するコンピュートバッファ 
@@ -77,7 +76,6 @@ public class ParticleBrush : MonoBehaviour
         cs.SetFloat("_TimeStep", Time.deltaTime);
         cs.SetFloat("_Speed", partticleSpeed);
         cs.SetFloat("_Thickness", trailBrush.width);
-        cs.SetInt("_nodeBufferSize", trailBrush.nodeNum);
         cs.SetBuffer(kernelId, "_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
         // コンピュートバッファをセット
         cs.SetBuffer(kernelId, "_ParticleBuffer", particleBuffer);

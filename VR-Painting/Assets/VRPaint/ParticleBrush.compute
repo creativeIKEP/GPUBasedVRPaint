@@ -68,24 +68,16 @@ void CSMain ( uint3 Gid  : SV_GroupID,
               uint3 DTid : SV_DispatchThreadID,
 			  uint  GI   : SV_GroupIndex )
 {
-	float speed = _Speed;
 	int nodeId = Gid.x;
-
-	// パーティクルのインデックス
 	int idx = DTid.x;
-	// パーティクルの速度を読み込み
+
+	float speed = _Speed;
 	float3 velocity = _ParticleBuffer[idx].velocity;
-	// パーティクルの位置を読み込み
 	float3 position = _ParticleBuffer[idx].position;
-
-	// 加速度を計算
 	float3 acceleration = _ParticleBuffer[idx].acceleration;
-
 	float time = _ParticleBuffer[idx].timeFromRePositioning + _TimeStep;
 
-	// 速度を計算
 	velocity += acceleration * _TimeStep;
-	// 位置を計算
 	position += velocity     * _TimeStep;
 
 	int nextNodeId = nodeId + 1;
@@ -95,7 +87,6 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 
 	
 	if (length(position - _NodeBuffer[nodeId].position) > length(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position)) {
-		//position = _NodeBuffer[nextNodeId].position + _Thickness * randomInsideUnitSphere(float(idx));
 		velocity = normalize(_NodeBuffer[nextNodeId + 1].position - _NodeBuffer[nextNodeId].position);
 		acceleration = normalize(_NodeBuffer[nextNodeId + 1].position - _NodeBuffer[nextNodeId].position);
 		acceleration *= speed;
@@ -111,12 +102,11 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		time = 0;
 		position = _NodeBuffer[nodeId].position +_Thickness * randomInsideUnitSphere(float(idx));
 		velocity = normalize(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position);
-		//position += rand(float2(idx, 0)) * length(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position) * velocity;
 		acceleration = normalize(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position);
 		acceleration *= speed;
 	}
 
-	// 速度と位置をバッファに書き込み
+	
 	_ParticleBuffer[idx].velocity = velocity;
 	_ParticleBuffer[idx].position = position;
 	_ParticleBuffer[idx].acceleration = acceleration;

@@ -132,7 +132,7 @@ namespace TrailBase
                 {
                     Vector3 currentNodePos = trailData.nodes[trailData.currentNodeIdx].pos;
                     Vector3 nodePos = currentNodePos + updateDistaceMin * (input.pos - trailData.nodes[trailData.currentNodeIdx].pos).normalized;
-                    SetNewNode(nodePos, new Color(1, 0, 0, 1), trailData, trail);
+                    SetNewNode(nodePos, new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value, 1), trailData, trail);
 
                     dist = Vector3.Distance(input.pos, nodePos);
                 }
@@ -140,7 +140,7 @@ namespace TrailBase
                 //ラインの最初の点だけは指定された位置
                 if (isNewTrail)
                 {
-                    SetNewNode(input.pos, new Color(1, 1, 1, 1), trailData, trail);
+                    SetNewNode(input.pos, new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value, 1), trailData, trail);
                 }
             }
         }
