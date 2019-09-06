@@ -126,59 +126,49 @@ namespace TrailBase
                     dist = Vector3.Distance(input.pos, trailData.nodes[trailData.currentNodeIdx].pos);
                 }
 
-                while(dist > updateDistaceMin && !isNewTrail)
+                //input positionと前フレームでの最後の点を結ぶ
+                //一定の距離で正規化して配置。そのため、厳密には、マウスの点を通らない可能性あり
+                while (dist > updateDistaceMin && !isNewTrail)
                 {
-                    Node node;
-                    node.time = Time.time;
-                    node.pos = trailData.nodes[trailData.currentNodeIdx].pos + updateDistaceMin * (input.pos - trailData.nodes[trailData.currentNodeIdx].pos).normalized;
-                    node.trailId = trailData.currentTrailId;
-                    node.color = new Color(1, 0, 0, 1);
+                    Vector3 currentNodePos = trailData.nodes[trailData.currentNodeIdx].pos;
+                    Vector3 nodePos = currentNodePos + updateDistaceMin * (input.pos - trailData.nodes[trailData.currentNodeIdx].pos).normalized;
+                    SetNewNode(nodePos, new Color(1, 0, 0, 1), trailData, trail);
 
-                    trailData.currentNodeIdx++;
-
-                    if(trailData.currentNodeIdx >= nodeNum)
-                    {
-                        trailData.currentNodeIdx = 0;
-                    }
-
-                    // update trail
-                    trailData.trails[trailData.currentTrailId] = trail;
-
-                    // write new node
-                    trailData.nodes[trailData.currentNodeIdx] = node;
-
-                    trailData.trailBuffer.SetData(trailData.trails, trailData.currentTrailId, trailData.currentTrailId, 1);
-                    trailData.nodeBuffer.SetData(trailData.nodes, trailData.currentNodeIdx, trailData.currentNodeIdx, 1);
-
-                    dist = Vector3.Distance(input.pos, node.pos);
+                    dist = Vector3.Distance(input.pos, nodePos);
                 }
 
+                //ラインの最初の点だけは指定された位置
                 if (isNewTrail)
                 {
-                    Node mouseNode;
-                    mouseNode.time = Time.time;
-                    mouseNode.pos = input.pos;
-                    mouseNode.trailId = trailData.currentTrailId;
-                    mouseNode.color = new Color(1, 1, 1, 1);
-
-                    trailData.currentNodeIdx++;
-
-                    if (trailData.currentNodeIdx >= nodeNum)
-                    {
-                        trailData.currentNodeIdx = 0;
-                    }
-
-                    // update trail
-                    trailData.trails[trailData.currentTrailId] = trail;
-
-                    // write new node
-                    trailData.nodes[trailData.currentNodeIdx] = mouseNode;
-
-                    trailData.trailBuffer.SetData(trailData.trails, trailData.currentTrailId, trailData.currentTrailId, 1);
-                    trailData.nodeBuffer.SetData(trailData.nodes, trailData.currentNodeIdx, trailData.currentNodeIdx, 1);
+                    SetNewNode(input.pos, new Color(1, 1, 1, 1), trailData, trail);
                 }
-                
             }
+        }
+
+
+        void SetNewNode(Vector3 nodePos, Color nodeColor, TrailData trailData, Trail trail)
+        {
+            Node node;
+            node.time = Time.time;
+            node.pos = nodePos;
+            node.trailId = trailData.currentTrailId;
+            node.color = nodeColor;
+
+            trailData.currentNodeIdx++;
+
+            if (trailData.currentNodeIdx >= nodeNum)
+            {
+                trailData.currentNodeIdx = 0;
+            }
+
+            // update trail
+            trailData.trails[trailData.currentTrailId] = trail;
+
+            // write new node
+            trailData.nodes[trailData.currentNodeIdx] = node;
+
+            trailData.trailBuffer.SetData(trailData.trails, trailData.currentTrailId, trailData.currentTrailId, 1);
+            trailData.nodeBuffer.SetData(trailData.nodes, trailData.currentNodeIdx, trailData.currentNodeIdx, 1);
         }
 
 
