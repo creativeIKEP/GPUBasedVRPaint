@@ -109,7 +109,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	if (time >= _ParticleBuffer[idx].lifeTime)
 	{
 		time = 0;
-		position = _NodeBuffer[nodeId].position + _Thickness * randomInsideUnitSphere(float(idx));
+		position = _NodeBuffer[nodeId].position +_Thickness * randomInsideUnitSphere(float(idx));
 		velocity = normalize(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position);
 		//position += rand(float2(idx, 0)) * length(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position) * velocity;
 		acceleration = normalize(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position);

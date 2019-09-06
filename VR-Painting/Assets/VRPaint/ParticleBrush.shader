@@ -72,10 +72,13 @@ Shader "Hidden/ParticleBrush"
 		// パーティクルの位置
 		o.position = _ParticleBuffer[id].position;
 		// パーティクルの速度を色に反映
-		o.color = _ParticleColor;
+		//o.color = _ParticleColor;
 
 		if (!IsValid(_NodeBuffer[_ParticleBuffer[id].generatedNodeId])) {
 			o.color.a = 0.0;
+		}
+		else {
+			o.color = _NodeBuffer[_ParticleBuffer[id].generatedNodeId].color;
 		}
 		return o;
 	}
