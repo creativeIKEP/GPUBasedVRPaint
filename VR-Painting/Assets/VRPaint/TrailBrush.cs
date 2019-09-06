@@ -121,20 +121,23 @@ namespace TrailBase
                 }
 
                 bool update = true;
+                float dist = 0;
                 if (trailData.currentNodeIdx >= 0)
                 {
-                    Node node = trailData.nodes[trailData.currentNodeIdx];
-                    float dist = Vector3.Distance(input.pos, node.pos);
+                    dist = Vector3.Distance(input.pos, trailData.nodes[trailData.currentNodeIdx].pos);
                     update = dist > updateDistaceMin;
                 }
 
-                if (update)
+                //if (update)
+                while(update && dist > width && !isNewTrail)
                 {
                     Node node;
                     node.time = Time.time;
-                    node.pos = input.pos;
+                    node.pos = trailData.nodes[trailData.currentNodeIdx].pos + width * (input.pos - trailData.nodes[trailData.currentNodeIdx].pos).normalized;
                     node.trailId = trailData.currentTrailId;
                     node.color = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value, 1);
+
+                    //点の補完が必要？
 
                     trailData.currentNodeIdx++;
 
@@ -151,7 +154,33 @@ namespace TrailBase
 
                     trailData.trailBuffer.SetData(trailData.trails, trailData.currentTrailId, trailData.currentTrailId, 1);
                     trailData.nodeBuffer.SetData(trailData.nodes, trailData.currentNodeIdx, trailData.currentNodeIdx, 1);
+
+                    dist = Vector3.Distance(input.pos, node.pos);
+                    Debug.Log(trailData.currentNodeIdx);
                 }
+
+                Node mouseNode;
+                mouseNode.time = Time.time;
+                mouseNode.pos = input.pos;
+                mouseNode.trailId = trailData.currentTrailId;
+                mouseNode.color = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value, 1);
+
+                //点の補完が必要？
+                trailData.currentNodeIdx++;
+
+                if (trailData.currentNodeIdx >= nodeNum)
+                {
+                    trailData.currentNodeIdx = 0;
+                }
+
+                // update trail
+                trailData.trails[trailData.currentTrailId] = trail;
+
+                // write new node
+                trailData.nodes[trailData.currentNodeIdx] = mouseNode;
+
+                trailData.trailBuffer.SetData(trailData.trails, trailData.currentTrailId, trailData.currentTrailId, 1);
+                trailData.nodeBuffer.SetData(trailData.nodes, trailData.currentNodeIdx, trailData.currentNodeIdx, 1);
             }
         }
 

@@ -76,7 +76,7 @@ public class ParticleBrush : MonoBehaviour
         cs.SetInt("_particleNum", NUM_PARTICLES);
         cs.SetFloat("_TimeStep", Time.deltaTime);
         cs.SetFloat("_Speed", partticleSpeed);
-        cs.SetFloat("_Thickness", lineThickness);
+        cs.SetFloat("_Thickness", trailBrush.width);
         cs.SetInt("_nodeBufferSize", trailBrush.nodeNum);
         cs.SetBuffer(kernelId, "_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
         // コンピュートバッファをセット

@@ -89,7 +89,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	position += velocity     * _TimeStep;
 
 	int nextNodeId = nodeId + 1;
-	if (!IsValid(_NodeBuffer[nextNodeId])) {
+	if (!IsValid(_NodeBuffer[nextNodeId]) || _NodeBuffer[nextNodeId].trailId != _NodeBuffer[nodeId].trailId) {
 		nextNodeId = nodeId;
 	}
 
