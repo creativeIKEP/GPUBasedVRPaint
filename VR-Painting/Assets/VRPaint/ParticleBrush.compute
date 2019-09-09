@@ -68,8 +68,8 @@ void CSMain ( uint3 Gid  : SV_GroupID,
               uint3 DTid : SV_DispatchThreadID,
 			  uint  GI   : SV_GroupIndex )
 {
-	int nodeId = Gid.x;
 	int idx = DTid.x;
+	int nodeId = _ParticleBuffer[idx].generatedNodeId;//Gid.x;
 
 	float speed = _Speed;
 	float3 velocity = _ParticleBuffer[idx].velocity;
@@ -85,27 +85,25 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		nextNodeId = nodeId;
 	}
 
-	
 	if (length(position - _NodeBuffer[nodeId].position) > length(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position)) {
-		velocity = normalize(_NodeBuffer[nextNodeId + 1].position - _NodeBuffer[nextNodeId].position);
-		acceleration = normalize(_NodeBuffer[nextNodeId + 1].position - _NodeBuffer[nextNodeId].position);
+		//float sub = length(position - _NodeBuffer[nextNodeId].position);
+		
+		position += _NodeBuffer[nextNodeId].position - position +_Thickness * randomInsideUnitSphere(float(idx));
+		velocity = normalize(_NodeBuffer[nextNodeId + 1].position + _Thickness * randomInsideUnitSphere(float(idx)) - position);// _NodeBuffer[nextNodeId].position);
+		acceleration = normalize(_NodeBuffer[nextNodeId + 1].position + _Thickness * randomInsideUnitSphere(float(idx)) - position);// _NodeBuffer[nextNodeId].position);
 		acceleration *= speed;
-
-		if (length(position - _NodeBuffer[nextNodeId].position) > _Thickness * 1.5) {
-			time = _ParticleBuffer[idx].lifeTime;
-		}
+		nodeId += 1;
 	}
-	
 
 	if (time >= _ParticleBuffer[idx].lifeTime)
 	{
 		time = 0;
-		position = _NodeBuffer[nodeId].position +_Thickness * randomInsideUnitSphere(float(idx));
+		nodeId = Gid.x;
+		position = _NodeBuffer[nodeId].position + _Thickness * randomInsideUnitSphere(float(idx));
 		velocity = normalize(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position);
 		acceleration = normalize(_NodeBuffer[nextNodeId].position - _NodeBuffer[nodeId].position);
 		acceleration *= speed;
 	}
-
 	
 	_ParticleBuffer[idx].velocity = velocity;
 	_ParticleBuffer[idx].position = position;
