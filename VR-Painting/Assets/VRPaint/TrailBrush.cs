@@ -97,7 +97,7 @@ namespace TrailBase
         void Start()
         {
             trailDatas = new TrailData[Enum.GetValues(typeof(TrailType)).Length];
-            for(int i=0; i<trailDatas.Length; i++)
+            for (int i = 0; i < trailDatas.Length; i++)
             {
                 trailDatas[i] = new TrailData(trailNum, nodeNum, (TrailType)i);
             }

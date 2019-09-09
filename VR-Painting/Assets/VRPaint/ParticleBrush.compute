@@ -36,6 +36,7 @@ RWStructuredBuffer<ParticleData> _ParticleBuffer;
 int _particleNum;
 
 StructuredBuffer<Node> _NodeBuffer;
+float _nodeUpdateMin;
 
 
 // 乱数(0.0~1.0)を返す関数
@@ -51,9 +52,9 @@ float3 randomInsideUnitSphere (float co)
 	float th  = acos(1.0 - 2.0 * rand(co + float2(0.0, 0.1)));
 	float r   = pow(rand(co + float2(0.0, 0.2)), 0.333333333);
   
-	float x = r * sin(th) * cos(phi);
+	float x = r* sin(th)* cos(phi);
 	float y = r * sin(th) * sin(phi);
-	float z = r * cos(th);
+	float z = r* cos(th);
   
 	return float3(x, y, z);
 }
@@ -68,7 +69,13 @@ int NextNodeId(int nodeId) {
 }
 
 float3 WidthExpandParticlePos(int particleId, float3 pos) {
-	return pos + _Thickness * randomInsideUnitSphere(float(particleId));
+	return pos +_Thickness * randomInsideUnitSphere(float(particleId));
+}
+
+
+float mod(float x, float y)
+{
+	return x - y * floor(x / y);
 }
 
 
@@ -87,6 +94,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	int toNodeId = NextNodeId(fromNodeId);
 	float3 velocity = _ParticleBuffer[particleId].velocity;
 	float3 position = _ParticleBuffer[particleId].position;
+	float3 prePosition = position;
 	float3 acceleration = _ParticleBuffer[particleId].acceleration;
 	float time = _ParticleBuffer[particleId].timeFromRePositioning;
 	float speed = _Speed;
@@ -94,24 +102,51 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	time += _TimeStep;
 	velocity += acceleration * _TimeStep;
 	position += velocity * _TimeStep;
-
+	
 
 	float fromNodeToDistance = length(position - _NodeBuffer[fromNodeId].position);
 	float nodeBetweenDistance = length(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
 	bool isArriveToNode = fromNodeToDistance > nodeBetweenDistance;
 
+	
 	if (isArriveToNode) {
 		//はみ出た分だけ線上positionを修正し、線上に戻す
 		position += _NodeBuffer[toNodeId].position - position;
 		position = WidthExpandParticlePos(particleId, position);
-
-		int nextToNodeId = NextNodeId(toNodeId);
+		int nextToNodeId = 0;
+		for (int i = 0; i < speed; i++) {
+			nextToNodeId = NextNodeId(toNodeId);
+		}
+		
 		float3 newToNodePos = WidthExpandParticlePos(particleId, _NodeBuffer[nextToNodeId].position);
 		velocity = normalize(newToNodePos - position);
 		acceleration = normalize(newToNodePos - position);
 		acceleration *= speed;
-		fromNodeId = NextNodeId(fromNodeId);
+		fromNodeId = nextToNodeId - 1;
 	}
+	
+	
+	
+	/*
+	float a = dot(normalize(position - _NodeBuffer[toNodeId].position), normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position));
+
+	if (length(position - _NodeBuffer[toNodeId].position) > _nodeUpdateMin && a>0) {
+		
+		float len = length(position - _NodeBuffer[toNodeId].position);
+		int step = int(len / _nodeUpdateMin);
+		for (int i = 0; i < step; i++) {
+			fromNodeId = NextNodeId(fromNodeId);
+		}
+		toNodeId = NextNodeId(fromNodeId);
+
+		position = _NodeBuffer[fromNodeId].position;// +mod(len - 1, step) * normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
+		position = WidthExpandParticlePos(particleId, position);
+		float3 newToNodePos = WidthExpandParticlePos(particleId, _NodeBuffer[toNodeId].position);
+		velocity = normalize(newToNodePos - position);
+		acceleration = normalize(newToNodePos - position);
+		acceleration *= speed;
+	}
+	*/
 
 	if (time >= _ParticleBuffer[particleId].lifeTime)
 	{

@@ -11,7 +11,7 @@ public struct ParticleData
     public Vector3 Acceleration;
     public float LifeTime;
     public float TimeFromRePositioning;
-    public int generatedNodeId;
+    public int GeneratedNodeId;
 };
 
 public class ParticleBrush : MonoBehaviour
@@ -51,7 +51,7 @@ public class ParticleBrush : MonoBehaviour
             pData[i].Acceleration = Random.insideUnitSphere;
             pData[i].LifeTime = lifeTime + Random.Range(-lifeTime * 0.5f, lifeTime * 0.5f);
             pData[i].TimeFromRePositioning = 0;
-            pData[i].generatedNodeId = i * trailBrush.nodeNum / NUM_PARTICLES;
+            pData[i].GeneratedNodeId = i * trailBrush.nodeNum / NUM_PARTICLES;
         }
         // コンピュートバッファに初期値データをセット
         particleBuffer.SetData(pData);
@@ -76,6 +76,7 @@ public class ParticleBrush : MonoBehaviour
         cs.SetFloat("_TimeStep", Time.deltaTime);
         cs.SetFloat("_Speed", partticleSpeed);
         cs.SetFloat("_Thickness", trailBrush.width);
+        cs.SetFloat("_nodeUpdateMin", trailBrush.updateDistaceMin);
         cs.SetBuffer(kernelId, "_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
         // コンピュートバッファをセット
         cs.SetBuffer(kernelId, "_ParticleBuffer", particleBuffer);
