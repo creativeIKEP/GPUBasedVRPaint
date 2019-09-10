@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+[RequireComponent(typeof(SteamVRControllerInput))]
 public class InputManager : MonoBehaviour
 {
     public Camera camera;
@@ -28,14 +29,7 @@ public class InputManager : MonoBehaviour
 
         if (controllerInput.trrigerClick.GetState(controllerInput.hand))
         {
-            // Vector3でマウス位置座標を取得する
-            var position = Input.mousePosition;
-            // Z軸修正
-            position.z = 10f;
-            // マウス位置座標をスクリーン座標からワールド座標に変換する
-            var pos = camera.ScreenToWorldPoint(position);
-
-            pos = hand.transform.position;
+            var pos = hand.transform.position;
 
             TrailBase.Input nodeInput = new TrailBase.Input { pos = pos };
             trailBrush.InputPoint(nodeInput, isNewTrailInput);
