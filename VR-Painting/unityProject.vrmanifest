@@ -1,0 +1,16 @@
+{
+  "source": "Unity",
+  "applications": [
+    {
+      "app_key": "application.generated.unity.simplecomputeshader.exe",
+      "launch_type": "url",
+      "url": "steam://launch/",
+      "action_manifest_path": "C:\\Users\\iketanisyunya\\Desktop\\VR-Painting\\VR-Painting\\actions.json",
+      "strings": {
+        "en_us": {
+          "name": "SimpleComputeShader [Testing]"
+        }
+      }
+    }
+  ]
+}
