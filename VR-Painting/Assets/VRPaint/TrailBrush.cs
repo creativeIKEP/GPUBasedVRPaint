@@ -86,6 +86,7 @@ namespace TrailBase
         public float updateDistaceMin = 0.01f;
         public TrailType currentTrailType;
         public float width;
+        public Color color;
 
         public TrailData[] trailDatas;
 
@@ -152,7 +153,7 @@ namespace TrailBase
             node.time = Time.time;
             node.pos = nodePos;
             node.trailId = trailData.currentTrailId;
-            node.color = nodeColor;
+            node.color = color;
 
             trailData.currentNodeIdx++;
 

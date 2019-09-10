@@ -30,7 +30,6 @@ public class ParticleBrush : MonoBehaviour
 
     public Camera RenderCam; // パーティクルをレンダリングするカメラ（ビルボードのための逆ビュー行列計算に使用）
     public float lifeTime = 1.0f;
-    public Color particleColor;
     public float partticleSpeed = 10.0f;
     public TrailBrush trailBrush;
 
@@ -96,7 +95,6 @@ public class ParticleBrush : MonoBehaviour
         // コンピュートバッファをセット
         m.SetBuffer("_ParticleBuffer", particleBuffer);
         m.SetBuffer("_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
-        m.SetColor("_ParticleColor", particleColor);
         // パーティクルをレンダリング
         Graphics.DrawProceduralNow(MeshTopology.Points, NUM_PARTICLES);
     }

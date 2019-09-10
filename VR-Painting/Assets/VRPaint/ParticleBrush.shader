@@ -43,8 +43,6 @@ Shader "Hidden/ParticleBrush"
 	// 逆ビュー行列
 	float4x4  _InvViewMatrix;
 
-	float4 _ParticleColor;
-
 	// Quadプレーンの座標
 	static const float3 g_positions[4] =
 	{
