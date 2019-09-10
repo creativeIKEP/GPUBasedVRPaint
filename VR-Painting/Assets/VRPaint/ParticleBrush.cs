@@ -30,7 +30,6 @@ public class ParticleBrush : MonoBehaviour
 
     public Camera RenderCam; // パーティクルをレンダリングするカメラ（ビルボードのための逆ビュー行列計算に使用）
     public float lifeTime = 1.0f;
-    public float partticleSpeed = 10.0f;
     public TrailBrush trailBrush;
 
     ComputeBuffer particleBuffer;     // パーティクルのデータを格納するコンピュートバッファ 
@@ -68,14 +67,11 @@ public class ParticleBrush : MonoBehaviour
         ComputeShader cs = SimpleParticleComputeShader;
         int kernelId = cs.FindKernel("CSMain");
 
-        // スレッドグループ数を計算
-        //int numThreadGroup = NUM_PARTICLES / trailBrush.nodeNum;
-        // 各パラメータをセット
         cs.SetInt("_particleNum", NUM_PARTICLES);
         cs.SetFloat("_TimeStep", Time.deltaTime);
-        cs.SetFloat("_Speed", partticleSpeed);
         cs.SetFloat("_Thickness", trailBrush.width);
         cs.SetFloat("_nodeUpdateMin", trailBrush.updateDistaceMin);
+        cs.SetBuffer(kernelId, "_TrailBuffer", trailBrush.trailDatas[(int)TrailType.Particle].trailBuffer);
         cs.SetBuffer(kernelId, "_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
         // コンピュートバッファをセット
         cs.SetBuffer(kernelId, "_ParticleBuffer", particleBuffer);
