@@ -47,6 +47,7 @@ namespace TrailBase
     public struct Trail
     {
         public int type;
+        public float witdh;
         public float particleSpeed;
     }
 
@@ -121,6 +122,7 @@ namespace TrailBase
                 if (isNewTrail)
                 {
                     trail.type = (int)currentTrailType;
+                    trail.witdh = width;
                     trail.particleSpeed = particleSpeed;
                 }
 

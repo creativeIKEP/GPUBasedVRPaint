@@ -6,7 +6,6 @@ using UnityEngine;
 [RequireComponent(typeof(SteamVRControllerInput))]
 public class InputManager : MonoBehaviour
 {
-    public Camera camera;
     public TrailBase.TrailBrush trailBrush;
     bool isNewTrailInput;
 

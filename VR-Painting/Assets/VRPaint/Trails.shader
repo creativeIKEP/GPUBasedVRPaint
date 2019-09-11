@@ -1,27 +1,27 @@
 ﻿Shader "GPUTrails/Trails" {
 
-Properties {
-	
-}
-   
-SubShader {
-Pass{
-	Cull Off Fog { Mode Off } ZWrite Off 
-	Blend One One
+	Properties{
 
-	CGPROGRAM
-	#pragma target 5.0
-	#pragma vertex vert
-	#pragma geometry geom
-	#pragma fragment frag
+	}
 
-	#include "UnityCG.cginc"
-	#include "GPUTrailsUtil.cginc"
+	SubShader{
+	Pass{
+		Cull Off Fog { Mode Off } ZWrite Off
+		Blend One One
 
+		CGPROGRAM
+		#pragma target 5.0
+		#pragma vertex vert
+		#pragma geometry geom
+		#pragma fragment frag
+
+		#include "UnityCG.cginc"
+		#include "GPUTrailsUtil.cginc"
+
+	StructuredBuffer<Trail> _TrailBuffer;
 	StructuredBuffer<Node> _NodeBuffer;
 	int _currentNodeIdx;
 	int _nodeBufferSize;
-	float _Width;
 
 	struct vs_out {
 		float4 pos : POSITION0;
@@ -30,6 +30,7 @@ Pass{
 		float4 posNext: POSITION1;
 		float3 dirNext : TANGENT1;
 		float4 colNext : COLOR1;
+		float2 trailWidth : TEXCOORD0; //float型で渡すものがないので、とりあえずこれのxで渡す
 	};
 
 	struct gs_out {
@@ -37,7 +38,7 @@ Pass{
 		float4 col : COLOR;
 	};
 
-	Node GetNode(int id) {
+	Node GetNode(uint id) {
 		return _NodeBuffer[id % _nodeBufferSize];
 	}
 
@@ -70,6 +71,7 @@ Pass{
 
 		Out.col = node1.color;
 		Out.colNext = node2.color;
+		Out.trailWidth = float2(_TrailBuffer[node1.trailId].width, 0);
 
 		return Out;
 	}
@@ -89,7 +91,7 @@ Pass{
 
 		float3 toCamDirNext = normalize(camPos - posNext);
 		float3 sideDirNext = normalize(cross(toCamDirNext, dirNext));
-		float width = _Width * 0.5;
+		float width = input[0].trailWidth.x * 0.5;
 
 		output0.pos = UnityWorldToClipPos(pos + (sideDir * width));
 		output1.pos = UnityWorldToClipPos(pos - (sideDir * width));

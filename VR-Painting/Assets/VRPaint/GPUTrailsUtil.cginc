@@ -9,6 +9,7 @@ struct Input
 struct Trail
 {
 	int type;
+	float width;
 	float particleSpeed;
 };
 

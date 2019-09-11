@@ -69,7 +69,6 @@ public class ParticleBrush : MonoBehaviour
 
         cs.SetInt("_particleNum", NUM_PARTICLES);
         cs.SetFloat("_TimeStep", Time.deltaTime);
-        cs.SetFloat("_Thickness", trailBrush.width);
         cs.SetFloat("_nodeUpdateMin", trailBrush.updateDistaceMin);
         cs.SetBuffer(kernelId, "_TrailBuffer", trailBrush.trailDatas[(int)TrailType.Particle].trailBuffer);
         cs.SetBuffer(kernelId, "_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
