@@ -10,6 +10,7 @@ public class LineParamSelector : MonoBehaviour
     public GameObject padUi;
     public LineTypeSelector lineTypeSelector;
     public ColorPickerTriangle_VR colorPickerTriangle_VR;
+    public WidthSelector widthSelector;
 
     SteamVRControllerInput controllerInput;
     bool isEditing;
@@ -39,6 +40,10 @@ public class LineParamSelector : MonoBehaviour
             {
                 ChangeColor();
             }
+            if (padPos.x < 0 && padPos.y < 0)
+            {
+                ChangeWidth();
+            }
         }
     }
 
@@ -64,6 +69,18 @@ public class LineParamSelector : MonoBehaviour
         {
             isEditing = false;
             trailBrush.color = selectedColor;
+            padUi.SetActive(true);
+        });
+    }
+
+    void ChangeWidth()
+    {
+        isEditing = true;
+        padUi.SetActive(false);
+        widthSelector.StartSelect(trailBrush.width, (float width) =>
+        {
+            isEditing = false;
+            trailBrush.width = width;
             padUi.SetActive(true);
         });
     }
