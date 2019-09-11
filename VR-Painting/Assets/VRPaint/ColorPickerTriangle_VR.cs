@@ -82,8 +82,9 @@ public class ColorPickerTriangle_VR : MonoBehaviour
 
     public delegate void EndEdit(Color color);
 
-    public void StartColorSelect(EndEdit callback)
+    public void StartColorSelect(Color initColor, EndEdit callback)
     {
+        SetNewColor(initColor);
         gameObject.SetActive(true);
         count = 1;
         endEditCallBack = callback;
