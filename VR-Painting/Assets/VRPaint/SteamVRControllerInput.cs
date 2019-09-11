@@ -25,7 +25,6 @@ public class SteamVRControllerInput : MonoBehaviour
         {
             Debug.Log("trrigerClick");
         }
-        
 
         if (padClick.GetState(hand))
         {
