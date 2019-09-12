@@ -69,7 +69,7 @@ int NextNodeId(int nodeId) {
 }
 
 float3 WidthExpandParticlePos(int particleId, float3 pos, float lineWidth) {
-	return pos + lineWidth * randomInsideUnitSphere(float(particleId));
+	return pos + lineWidth * 0.5 * randomInsideUnitSphere(float(particleId));
 }
 
 
@@ -95,11 +95,11 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	float3 velocity = _ParticleBuffer[particleId].velocity;
 	float3 position = _ParticleBuffer[particleId].position;
 	float3 prePosition = position;
-	float3 acceleration = _ParticleBuffer[particleId].acceleration;
+	//float3 acceleration = _ParticleBuffer[particleId].acceleration;
 	float time = _ParticleBuffer[particleId].timeFromRePositioning;
 	
 	time += _TimeStep;
-	velocity += acceleration * _TimeStep;
+	//velocity += acceleration * _TimeStep;
 	position += velocity * _TimeStep;
 	
 
@@ -117,10 +117,10 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 
 		position = _NodeBuffer[fromNodeId].position;
 		position = WidthExpandParticlePos(particleId, position, _TrailBuffer[_NodeBuffer[fromNodeId].trailId].width);
-		float3 newToNodePos = WidthExpandParticlePos(particleId, _NodeBuffer[toNodeId].position, _TrailBuffer[_NodeBuffer[fromNodeId].trailId].width);
 		velocity = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
-		acceleration = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
-		acceleration *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
+		velocity *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
+		//acceleration = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
+		//acceleration *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
 	}
 
 	if (time >= _ParticleBuffer[particleId].lifeTime)
@@ -130,13 +130,14 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		toNodeId = NextNodeId(fromNodeId);
 		position = WidthExpandParticlePos(particleId, _NodeBuffer[fromNodeId].position, _TrailBuffer[_NodeBuffer[fromNodeId].trailId].width);
 		velocity = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
-		acceleration = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
-		acceleration *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
+		velocity *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
+		//acceleration = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
+		//acceleration *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
 	}
 	
 	_ParticleBuffer[particleId].velocity = velocity;
 	_ParticleBuffer[particleId].position = position;
-	_ParticleBuffer[particleId].acceleration = acceleration;
+	//_ParticleBuffer[particleId].acceleration = acceleration;
 	_ParticleBuffer[particleId].timeFromRePositioning = time;
 	_ParticleBuffer[particleId].generatedNodeId = fromNodeId;
 }
