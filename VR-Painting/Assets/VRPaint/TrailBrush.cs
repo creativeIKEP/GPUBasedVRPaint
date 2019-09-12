@@ -41,7 +41,8 @@ namespace TrailBase
     public enum TrailType
     {
         Trail,
-        Particle
+        Particle,
+        NoiseParticle
     }
 
     public struct Trail
