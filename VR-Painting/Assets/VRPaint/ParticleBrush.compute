@@ -27,6 +27,7 @@ struct ParticleData
 cbuffer CB
 {
 	float _TimeStep;
+	float _Time;
 }
 
 // 読み込み書き込みが可能なパーティクルデータを格納するバッファ
@@ -79,6 +80,66 @@ float mod(float x, float y)
 }
 
 
+/*
+#include "SimplexNoise3D.cginc"
+#define EPSILON 1e-3
+
+float3 curlNoise(float3 coord)
+{
+	float3 dx = float3(EPSILON, 0.0, 0.0);
+	float3 dy = float3(0.0, EPSILON, 0.0);
+	float3 dz = float3(0.0, 0.0, EPSILON);
+
+	float3 dpdx0 = simplexNoise(coord - dx);
+	float3 dpdx1 = simplexNoise(coord + dx);
+	float3 dpdy0 = simplexNoise(coord - dy);
+	float3 dpdy1 = simplexNoise(coord + dy);
+	float3 dpdz0 = simplexNoise(coord - dz);
+	float3 dpdz1 = simplexNoise(coord + dz);
+
+	float x = dpdy1.z - dpdy0.z + dpdz1.y - dpdz0.y;
+	float y = dpdz1.x - dpdz0.x + dpdx1.z - dpdx0.z;
+	float z = dpdx1.y - dpdx0.y + dpdy1.x - dpdy0.x;
+
+	return float3(x, y, z) / EPSILON * 2.0;
+}
+*/
+
+
+#include "Assets/GPUBasedTrails/Shaders/noise4D.cginc"
+
+float3 snoise3D(float4 x)
+{
+	float s = snoise(x);
+	float s1 = snoise(float4(x.y - 19.1, x.z + 33.4, x.x + 47.2, x.w));
+	float s2 = snoise(float4(x.z + 74.2, x.x - 124.5, x.y + 99.4, x.w));
+	float3 c = float3(s, s1, s2);
+	return c;
+}
+
+float3 curlNoise(float4 p) {
+
+	const float e = 0.0009765625;
+	float4 dx = float4(e, 0.0, 0.0, 0.0);
+	float4 dy = float4(0.0, e, 0.0, 0.0);
+	float4 dz = float4(0.0, 0.0, e, 0.0);
+
+	float3 p_x0 = snoise3D(p - dx);
+	float3 p_x1 = snoise3D(p + dx);
+	float3 p_y0 = snoise3D(p - dy);
+	float3 p_y1 = snoise3D(p + dy);
+	float3 p_z0 = snoise3D(p - dz);
+	float3 p_z1 = snoise3D(p + dz);
+
+	float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;
+	float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;
+	float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;
+
+	const float divisor = 1.0 / (2.0 * e);
+	return normalize(float3(x, y, z) * divisor);
+}
+
+
 // ------------------------------------------------------------------
 // カーネル関数
 // ------------------------------------------------------------------
@@ -100,9 +161,44 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 	
 	time += _TimeStep;
 	//velocity += acceleration * _TimeStep;
-	position += velocity * _TimeStep;
+
+
+
+
+	int minDistanceNodeIndex = fromNodeId;
+	float distance = length(position - _NodeBuffer[fromNodeId].position);
+	/*
+	for (int i = fromNodeId; i < NODE_NUM; i++) {
+		if (IsValid(_NodeBuffer[i]) && distance > length(position - _NodeBuffer[i].position)) {
+			distance = length(position - _NodeBuffer[i].position);
+			minDistanceNodeIndex = i;
+		}
+	}
+	fromNodeId = minDistanceNodeIndex;
+	*/
+	float3 baseDir = normalize(_NodeBuffer[NextNodeId(fromNodeId + 1)].position - _NodeBuffer[fromNodeId].position);
+	float3 noise = normalize(curlNoise(float4(position * 10.0, rand(float2(particleId, _Time)))));
+	if (dot(noise, baseDir) <= 0) {
+		noise = -noise;
+	}
+	velocity = normalize(0.5 * baseDir + 0.5 * noise);
+
+
+	//velocity *= _TrailBuffer[_NodeBuffer[minDistanceNodeIndex].trailId].particleSpeed;
+	position += velocity * _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed * _TimeStep;
+
+	float len = length(position - _NodeBuffer[toNodeId].position);
+	if (len > _TrailBuffer[_NodeBuffer[fromNodeId].trailId].width) {
+		/*
+		float3 backBaseLineDir = normalize(position - _NodeBuffer[toNodeId].position);
+		//velocity = normalize(10 * baseDir + 50 * noise);
+		position += backBaseLineDir * _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed * _TimeStep;
+		*/
+		time = _ParticleBuffer[particleId].lifeTime;
+	}
 	
 
+	/*
 	float fromNodeToDistance = length(position - _NodeBuffer[fromNodeId].position);
 	float nodeBetweenDistance = length(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
 	bool isArriveToNode = fromNodeToDistance > nodeBetweenDistance;
@@ -122,6 +218,7 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		//acceleration = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
 		//acceleration *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
 	}
+	*/
 
 	if (time >= _ParticleBuffer[particleId].lifeTime)
 	{
@@ -130,7 +227,8 @@ void CSMain ( uint3 Gid  : SV_GroupID,
 		toNodeId = NextNodeId(fromNodeId);
 		position = WidthExpandParticlePos(particleId, _NodeBuffer[fromNodeId].position, _TrailBuffer[_NodeBuffer[fromNodeId].trailId].width);
 		velocity = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
-		velocity *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
+		//velocity *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
+
 		//acceleration = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
 		//acceleration *= _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed;
 	}

@@ -74,6 +74,7 @@ public class ParticleBrush : MonoBehaviour
         cs.SetBuffer(kernelId, "_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
         // コンピュートバッファをセット
         cs.SetBuffer(kernelId, "_ParticleBuffer", particleBuffer);
+        cs.SetFloat("_Time", Time.time);
         // コンピュートシェーダを実行
         cs.Dispatch(kernelId, trailBrush.nodeNum, 1, 1);
 
