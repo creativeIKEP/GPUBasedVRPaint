@@ -1,4 +1,4 @@
-﻿#pragma kernel CSMain  // カーネル関数を指定
+﻿#pragma kernel NoiseParticleCalc  // カーネル関数を指定
 
 #define PARTICLE_NUM 327680 //ParticleBrush.csの定数と合わせる
 #define NODE_NUM 4000 //TrailBrush.csの定数と合わせる
@@ -26,18 +26,18 @@ struct ParticleData
 // 定数バッファ
 cbuffer CB
 {
-	float _TimeStep;
-	float _Time;
+	float _TimeStep_n;
+	float _Time_n;
 }
 
 // 読み込み書き込みが可能なパーティクルデータを格納するバッファ
-RWStructuredBuffer<ParticleData> _ParticleBuffer;
-int _particleNum;
+RWStructuredBuffer<ParticleData> _ParticleBuffer_n;
+int _particleNum_n;
 
-StructuredBuffer<Trail> _TrailBuffer;
+StructuredBuffer<Trail> _TrailBuffer_n;
 
-StructuredBuffer<Node> _NodeBuffer;
-float _nodeUpdateMin;
+StructuredBuffer<Node> _NodeBuffer_n;
+float _nodeUpdateMin_n;
 
 
 // 乱数(0.0~1.0)を返す関数
@@ -63,7 +63,7 @@ float3 randomInsideUnitSphere (float co)
 
 int NextNodeId(int nodeId) {
 	int nextNodeId = nodeId + 1;
-	if (!IsValid(_NodeBuffer[nextNodeId]) || _NodeBuffer[nextNodeId].trailId != _NodeBuffer[nodeId].trailId) {
+	if (!IsValid(_NodeBuffer_n[nextNodeId]) || _NodeBuffer_n[nextNodeId].trailId != _NodeBuffer_n[nodeId].trailId) {
 		nextNodeId = nodeId;
 	}
 	return nextNodeId;
@@ -113,46 +113,46 @@ float3 curlNoise(float4 p) {
 // ------------------------------------------------------------------
 // スレッド数を設定
 [numthreads(NUM_THREAD_X,NUM_THREAD_Y,NUM_THREAD_Z)]
-void CSMain ( uint3 Gid  : SV_GroupID,
+void NoiseParticleCalc ( uint3 Gid  : SV_GroupID,
               uint3 GTid : SV_GroupThreadID,
               uint3 DTid : SV_DispatchThreadID,
 			  uint  GI   : SV_GroupIndex )
 {
 	int particleId = DTid.x;
-	int fromNodeId = _ParticleBuffer[particleId].generatedNodeId;
+	int fromNodeId = _ParticleBuffer_n[particleId].generatedNodeId;
 	int toNodeId = NextNodeId(fromNodeId);
-	float3 velocity = _ParticleBuffer[particleId].velocity;
-	float3 position = _ParticleBuffer[particleId].position;
+	float3 velocity = _ParticleBuffer_n[particleId].velocity;
+	float3 position = _ParticleBuffer_n[particleId].position;
 	float3 prePosition = position;
-	float time = _ParticleBuffer[particleId].timeFromRePositioning;
-	time += _TimeStep;
+	float time = _ParticleBuffer_n[particleId].timeFromRePositioning;
+	time += _TimeStep_n;
 
 
-	float3 baseDir = normalize(_NodeBuffer[NextNodeId(fromNodeId + 1)].position - _NodeBuffer[fromNodeId].position);
-	float3 noise = normalize(curlNoise(float4(position * 10.0, rand(float2(particleId, _Time)))));
+	float3 baseDir = normalize(_NodeBuffer_n[NextNodeId(fromNodeId + 1)].position - _NodeBuffer_n[fromNodeId].position);
+	float3 noise = normalize(curlNoise(float4(position * 10.0, rand(float2(particleId, _Time_n)))));
 	if (dot(noise, baseDir) <= 0) {
 		noise = -noise;
 	}
 	velocity = normalize(0.5 * baseDir + 0.5 * noise);
 
-	position += velocity * _TrailBuffer[_NodeBuffer[fromNodeId].trailId].particleSpeed * _TimeStep;
+	position += velocity * _TrailBuffer_n[_NodeBuffer_n[fromNodeId].trailId].particleSpeed * _TimeStep_n;
 
-	float len = length(position - _NodeBuffer[toNodeId].position);
-	if (len > _TrailBuffer[_NodeBuffer[fromNodeId].trailId].width) {
-		time = _ParticleBuffer[particleId].lifeTime;
+	float len = length(position - _NodeBuffer_n[toNodeId].position);
+	if (len > _TrailBuffer_n[_NodeBuffer_n[fromNodeId].trailId].width) {
+		time = _ParticleBuffer_n[particleId].lifeTime;
 	}
 
-	if (time >= _ParticleBuffer[particleId].lifeTime)
+	if (time >= _ParticleBuffer_n[particleId].lifeTime)
 	{
 		time = 0;
 		fromNodeId = Gid.x;
 		toNodeId = NextNodeId(fromNodeId);
-		position = WidthExpandParticlePos(particleId, _NodeBuffer[fromNodeId].position, _TrailBuffer[_NodeBuffer[fromNodeId].trailId].width);
-		velocity = normalize(_NodeBuffer[toNodeId].position - _NodeBuffer[fromNodeId].position);
+		position = WidthExpandParticlePos(particleId, _NodeBuffer_n[fromNodeId].position, _TrailBuffer_n[_NodeBuffer_n[fromNodeId].trailId].width);
+		velocity = normalize(_NodeBuffer_n[toNodeId].position - _NodeBuffer_n[fromNodeId].position);
 	}
 	
-	_ParticleBuffer[particleId].velocity = velocity;
-	_ParticleBuffer[particleId].position = position;
-	_ParticleBuffer[particleId].timeFromRePositioning = time;
-	_ParticleBuffer[particleId].generatedNodeId = fromNodeId;
+	_ParticleBuffer_n[particleId].velocity = velocity;
+	_ParticleBuffer_n[particleId].position = position;
+	_ParticleBuffer_n[particleId].timeFromRePositioning = time;
+	_ParticleBuffer_n[particleId].generatedNodeId = fromNodeId;
 }

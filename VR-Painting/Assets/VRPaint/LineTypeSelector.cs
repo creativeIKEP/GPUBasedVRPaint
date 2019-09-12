@@ -7,6 +7,7 @@ public class LineTypeSelector : MonoBehaviour
     public SteamVRControllerInput controllerInput;
     public SpriteRenderer trailSprite;
     public SpriteRenderer particleSprite;
+    public SpriteRenderer noiseParticleSprite;
     public Color selectedColor;
     public Color notSelectedColor;
 
@@ -29,14 +30,19 @@ public class LineTypeSelector : MonoBehaviour
         if (isSelecting && controllerInput.padTouch.GetState(controllerInput.hand))
         {
             var padPos = controllerInput.padPosition.GetAxis(controllerInput.hand);
-            if (padPos.y >= 0)
+            if (padPos.y >= 2.0f / 3)
             {
                 currentType = TrailBase.TrailType.Trail;
                 ChangeSpriteColor();
             }
-            else
+            else if(padPos.y < 2.0f / 3 && padPos.y > -2.0f / 3)
             {
                 currentType = TrailBase.TrailType.Particle;
+                ChangeSpriteColor();
+            }
+            else
+            {
+                currentType = TrailBase.TrailType.NoiseParticle;
                 ChangeSpriteColor();
             }
         }
@@ -66,5 +72,6 @@ public class LineTypeSelector : MonoBehaviour
     {
         trailSprite.color = (currentType == TrailBase.TrailType.Trail) ? selectedColor : notSelectedColor;
         particleSprite.color = (currentType == TrailBase.TrailType.Particle) ? selectedColor : notSelectedColor;
+        noiseParticleSprite.color = (currentType == TrailBase.TrailType.NoiseParticle) ? selectedColor : notSelectedColor;
     }
 }

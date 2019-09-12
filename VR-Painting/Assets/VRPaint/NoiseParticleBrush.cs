@@ -56,16 +56,16 @@ public class NoiseParticleBrush : MonoBehaviour
     void OnRenderObject()
     {
         ComputeShader cs = SimpleParticleComputeShader;
-        int kernelId = cs.FindKernel("CSMain");
+        int kernelId = cs.FindKernel("NoiseParticleCalc");
 
-        cs.SetInt("_particleNum", NUM_PARTICLES);
-        cs.SetFloat("_TimeStep", Time.deltaTime);
-        cs.SetFloat("_nodeUpdateMin", trailBrush.updateDistaceMin);
-        cs.SetBuffer(kernelId, "_TrailBuffer", trailBrush.trailDatas[(int)TrailType.NoiseParticle].trailBuffer);
-        cs.SetBuffer(kernelId, "_NodeBuffer", trailBrush.trailDatas[(int)TrailType.NoiseParticle].nodeBuffer);
+        cs.SetInt("_particleNum_n", NUM_PARTICLES);
+        cs.SetFloat("_TimeStep_n", Time.deltaTime);
+        cs.SetFloat("_nodeUpdateMin_n", trailBrush.updateDistaceMin);
+        cs.SetBuffer(kernelId, "_TrailBuffer_n", trailBrush.trailDatas[(int)TrailType.NoiseParticle].trailBuffer);
+        cs.SetBuffer(kernelId, "_NodeBuffer_n", trailBrush.trailDatas[(int)TrailType.NoiseParticle].nodeBuffer);
         // コンピュートバッファをセット
-        cs.SetBuffer(kernelId, "_ParticleBuffer", particleBuffer);
-        cs.SetFloat("_Time", Time.time);
+        cs.SetBuffer(kernelId, "_ParticleBuffer_n", particleBuffer);
+        cs.SetFloat("_Time_n", Time.time);
         // コンピュートシェーダを実行
         cs.Dispatch(kernelId, trailBrush.nodeNum, 1, 1);
 
@@ -76,12 +76,12 @@ public class NoiseParticleBrush : MonoBehaviour
         Material m = particleRenderMat;
         m.SetPass(0); // レンダリングのためのシェーダパスをセット
                       // 各パラメータをセット
-        m.SetMatrix("_InvViewMatrix", inverseViewMatrix);
-        m.SetTexture("_MainTex", ParticleTex);
-        m.SetFloat("_ParticleSize", ParticleSize);
+        m.SetMatrix("_InvViewMatrix_n", inverseViewMatrix);
+        m.SetTexture("_MainTex_n", ParticleTex);
+        m.SetFloat("_ParticleSize_n", ParticleSize);
         // コンピュートバッファをセット
-        m.SetBuffer("_ParticleBuffer", particleBuffer);
-        m.SetBuffer("_NodeBuffer", trailBrush.trailDatas[(int)TrailType.Particle].nodeBuffer);
+        m.SetBuffer("_ParticleBuffer_n", particleBuffer);
+        m.SetBuffer("_NodeBuffer_n", trailBrush.trailDatas[(int)TrailType.NoiseParticle].nodeBuffer);
         // パーティクルをレンダリング
         Graphics.DrawProceduralNow(MeshTopology.Points, NUM_PARTICLES);
     }
