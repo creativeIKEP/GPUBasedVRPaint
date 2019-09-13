@@ -120,7 +120,7 @@
 
 			fixed4 frag(gs_out In) : COLOR
 			{
-				return tex2D(_MainTex, In.uv) * In.col;
+				return tex2D(_MainTex, In.uv) + In.col;
 			}
 
 			ENDCG
