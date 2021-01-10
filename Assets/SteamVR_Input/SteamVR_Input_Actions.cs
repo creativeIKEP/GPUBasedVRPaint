@@ -35,6 +35,10 @@ namespace Valve.VR
         
         private static SteamVR_Action_Boolean p_default_HeadsetOnHead;
         
+        private static SteamVR_Action_Boolean p_default_SnapTurnLeft;
+        
+        private static SteamVR_Action_Boolean p_default_SnapTurnRight;
+        
         private static SteamVR_Action_Boolean p_default_Grip;
         
         private static SteamVR_Action_Boolean p_default_TriggerClick;
@@ -130,6 +134,22 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.p_default_HeadsetOnHead.GetCopy<SteamVR_Action_Boolean>();
+            }
+        }
+        
+        public static SteamVR_Action_Boolean default_SnapTurnLeft
+        {
+            get
+            {
+                return SteamVR_Actions.p_default_SnapTurnLeft.GetCopy<SteamVR_Action_Boolean>();
+            }
+        }
+        
+        public static SteamVR_Action_Boolean default_SnapTurnRight
+        {
+            get
+            {
+                return SteamVR_Actions.p_default_SnapTurnRight.GetCopy<SteamVR_Action_Boolean>();
             }
         }
         
@@ -249,6 +269,8 @@ namespace Valve.VR
                     SteamVR_Actions.default_SkeletonRightHand,
                     SteamVR_Actions.default_Squeeze,
                     SteamVR_Actions.default_HeadsetOnHead,
+                    SteamVR_Actions.default_SnapTurnLeft,
+                    SteamVR_Actions.default_SnapTurnRight,
                     SteamVR_Actions.default_Grip,
                     SteamVR_Actions.default_TriggerClick,
                     SteamVR_Actions.default_PadClick,
@@ -272,6 +294,8 @@ namespace Valve.VR
                     SteamVR_Actions.default_SkeletonRightHand,
                     SteamVR_Actions.default_Squeeze,
                     SteamVR_Actions.default_HeadsetOnHead,
+                    SteamVR_Actions.default_SnapTurnLeft,
+                    SteamVR_Actions.default_SnapTurnRight,
                     SteamVR_Actions.default_Grip,
                     SteamVR_Actions.default_TriggerClick,
                     SteamVR_Actions.default_PadClick,
@@ -297,6 +321,8 @@ namespace Valve.VR
                     SteamVR_Actions.default_GrabPinch,
                     SteamVR_Actions.default_GrabGrip,
                     SteamVR_Actions.default_HeadsetOnHead,
+                    SteamVR_Actions.default_SnapTurnLeft,
+                    SteamVR_Actions.default_SnapTurnRight,
                     SteamVR_Actions.default_Grip,
                     SteamVR_Actions.default_TriggerClick,
                     SteamVR_Actions.default_PadClick,
@@ -322,6 +348,8 @@ namespace Valve.VR
                     SteamVR_Actions.default_GrabGrip,
                     SteamVR_Actions.default_Squeeze,
                     SteamVR_Actions.default_HeadsetOnHead,
+                    SteamVR_Actions.default_SnapTurnLeft,
+                    SteamVR_Actions.default_SnapTurnRight,
                     SteamVR_Actions.default_Grip,
                     SteamVR_Actions.default_TriggerClick,
                     SteamVR_Actions.default_PadClick,
@@ -346,6 +374,8 @@ namespace Valve.VR
             SteamVR_Actions.p_default_SkeletonRightHand = ((SteamVR_Action_Skeleton)(SteamVR_Action.Create<SteamVR_Action_Skeleton>("/actions/default/in/SkeletonRightHand")));
             SteamVR_Actions.p_default_Squeeze = ((SteamVR_Action_Single)(SteamVR_Action.Create<SteamVR_Action_Single>("/actions/default/in/Squeeze")));
             SteamVR_Actions.p_default_HeadsetOnHead = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/HeadsetOnHead")));
+            SteamVR_Actions.p_default_SnapTurnLeft = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/SnapTurnLeft")));
+            SteamVR_Actions.p_default_SnapTurnRight = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/SnapTurnRight")));
             SteamVR_Actions.p_default_Grip = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/Grip")));
             SteamVR_Actions.p_default_TriggerClick = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/TriggerClick")));
             SteamVR_Actions.p_default_PadClick = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/PadClick")));
