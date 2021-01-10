@@ -50,6 +50,26 @@
       "type": "boolean"
     },
     {
+      "name": "/actions/default/in/Grip",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/TriggerClick",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/PadClick",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/PadTouch",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/default/in/PadPosition",
+      "type": "vector2"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration"
     },
